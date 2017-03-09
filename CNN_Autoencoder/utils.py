@@ -54,5 +54,5 @@ def save_images(input, target, output, nbr_images, iteration):
 
 
 def get_path():
-    path = "~/Data"
+    path = "/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/Data"
     return path

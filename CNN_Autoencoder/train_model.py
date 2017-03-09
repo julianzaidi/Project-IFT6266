@@ -33,8 +33,12 @@ def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='/norm
     valid_input = dataset['valid_input']
     valid_target = dataset['valid_target']
 
-    n_train_batches = train_input.size[0] // batch_size
-    n_valid_batches = valid_input.size[0] // batch_size
+    print train_input.shape[0]
+    print valid_input.shape[0]
+    print batch_size
+
+    n_train_batches = train_input.shape[0] // batch_size
+    n_valid_batches = valid_input.shape[0] // batch_size
 
     ###################
     # Build the model #
