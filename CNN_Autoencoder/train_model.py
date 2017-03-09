@@ -8,11 +8,12 @@ import lasagne.objectives as objectives
 
 from model import build_model
 from utils import save_images
+from utils import get_path
 
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='normalized_mscoco_dataset.npz'):
+def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='/normalized_mscoco_dataset.npz'):
     '''
                     Function that compute the training of the model
                     '''
@@ -21,9 +22,11 @@ def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='norma
     # Loading the dataset #
     #######################
 
+    path = get_path()
+
     print '... Loading data'
 
-    dataset = np.load(dataset)
+    dataset = np.load(path + dataset)
 
     train_input = dataset['train_input']
     train_target = dataset['train_target']

@@ -51,3 +51,8 @@ def save_images(input, target, output, nbr_images, iteration):
 
     pylab.savefig('save' + str(iteration) + '_best_model.png', bbox_inches='tight')
     Image.open('save' + str(iteration) + '_best_model.png').save('save' + str(iteration) + '_best_model.jpg', 'JPEG')
+
+
+def get_path():
+    path = "~/Data"
+    return path
