@@ -59,16 +59,17 @@ def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='/norm
     updates = lasagne.updates.adam(loss, params, learning_rate=learning_rate)
 
     # Creation of theano functions
-    train_model = theano.function([index], loss, updates=updates,
+    train_model = theano.function([index], loss, updates=updates, allow_input_downcast=True,
                                   givens={x: train_input[index * batch_size: (index + 1) * batch_size],
                                           y: train_target[index * batch_size: (index + 1) * batch_size]})
 
-    valid_loss = theano.function([index], loss, givens={x: valid_input[index * batch_size: (index + 1) * batch_size],
-                                                        y: valid_target[index * batch_size: (index + 1) * batch_size]})
+    valid_loss = theano.function([index], loss, allow_input_downcast=True,
+                                 givens={x: valid_input[index * batch_size: (index + 1) * batch_size],
+                                         y: valid_target[index * batch_size: (index + 1) * batch_size]})
 
     idx = 50  # idx = index in this case
     batch = 5
-    predict_target = theano.function([index], output,
+    predict_target = theano.function([index], output, allow_input_downcast=True,
                                      givens={x: valid_input[index * batch: (index + 1) * batch]})
 
     ###################
