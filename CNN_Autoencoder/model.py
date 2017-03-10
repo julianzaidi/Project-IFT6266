@@ -13,7 +13,7 @@ from lasagne.nonlinearities import rectify
 
 def initialize_parameters():
     W = lasagne.init.Normal()
-    b = lasagne.init.Constant(1.)
+    b = lasagne.init.Constant(0.)
 
     return [W, b]
 
