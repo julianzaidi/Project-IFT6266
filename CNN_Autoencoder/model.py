@@ -13,7 +13,7 @@ from lasagne.nonlinearities import rectify
 
 def initialize_parameters():
     W = lasagne.init.Normal()
-    b = lasagne.init.constant(1.)
+    b = lasagne.init.Constant(1.)
 
     return [W, b]
 
@@ -23,11 +23,9 @@ class InputLayer(object):
         """
                 Input of the Network
 
-                NOTE : The non linearity used here is relu
-
                 """
 
-        self.output = layers.InputLayer(shape=shape, input_var=input_var)
+        self.output = layers.InputLayer(shape, input_var=input_var)
 
 
 class DenseLayer(object):
@@ -53,9 +51,9 @@ class ConvLayer(object):
                 """
 
         self.input = input
-        self.output = layers.Conv2DLayer(input, num_filters, filter_size, stride=stride, pad=pad,
-                                         W=initialize_parameters()[0],
-                                         b=initialize_parameters()[1], nonlinearity=activation)
+        self.output = layers.Conv2DLayer(self.input, num_filters, filter_size, stride=stride, pad=pad,
+                                         W=initialize_parameters()[0], b=initialize_parameters()[1],
+                                         nonlinearity=activation)
 
 
 class PoolLayer(object):
@@ -66,8 +64,8 @@ class PoolLayer(object):
                 """
 
         self.input = input
-        self.output = layers.Pool2DLayer(input=self.input, pool_size=poolsize, stride=stride, pad=padding,
-                                         ignore_border=True, mode=mode)
+        self.output = layers.Pool2DLayer(self.input, poolsize, stride=stride, pad=padding, ignore_border=True,
+                                         mode=mode)
 
 
 class UnpoolLayer(object):
@@ -78,7 +76,7 @@ class UnpoolLayer(object):
                 """
 
         self.input = input
-        self.output = layers.Upscale2DLayer(self.input, scale_factor=scale)
+        self.output = layers.Upscale2DLayer(self.input, scale)
 
 
 class TransposedConvLayer(object):
@@ -89,9 +87,10 @@ class TransposedConvLayer(object):
                 """
 
         self.input = input
-        self.output = layers.TransposedConv2DLayer(input, num_filters, filter_size, stride=stride, crop=padding,
+        self.output = layers.TransposedConv2DLayer(self.input, num_filters, filter_size, stride=stride, crop=padding,
                                                    W=initialize_parameters()[0], b=initialize_parameters()[1],
                                                    nonlinearity=activation)
+
 
 
 def build_model(input_var=None, input_channels=3, nfilters=[20, 30, 50, 60, 80, 60, 30, 10, 3],
@@ -100,7 +99,7 @@ def build_model(input_var=None, input_channels=3, nfilters=[20, 30, 50, 60, 80, 
     # Build Network Configuration #
     ###############################
 
-    print '... Build the model'
+    print '... Building the model'
 
     # Input of the network : shape = (batch_size, 3, 64, 64)
     input_layer = InputLayer(shape=(None, input_channels, 64, 64), input_var=input_var)
@@ -112,7 +111,7 @@ def build_model(input_var=None, input_channels=3, nfilters=[20, 30, 50, 60, 80, 
     conv_layer2 = ConvLayer(conv_layer1.output, num_filters=nfilters[1], filter_size=filter_size[1])
 
     # Pooling layer : output.shape = (batch_size, 30, 29, 29)
-    pool_layer1 = PoolLayer(conv_layer2.output, poolsize=(2, 2))
+    pool_layer1 = PoolLayer(conv_layer2.output)
 
     # Conv layer : output.shape = (batch_size, 50, 27, 27)
     conv_layer3 = ConvLayer(pool_layer1.output, num_filters=nfilters[2], filter_size=filter_size[2])
@@ -121,7 +120,7 @@ def build_model(input_var=None, input_channels=3, nfilters=[20, 30, 50, 60, 80, 
     conv_layer4 = ConvLayer(conv_layer3.output, num_filters=nfilters[3], filter_size=filter_size[3])
 
     # Pooling layer : output.shape = (batch_size, 60, 12, 12)
-    pool_layer2 = PoolLayer(conv_layer4.output, poolsize=(2, 2))
+    pool_layer2 = PoolLayer(conv_layer4.output)
 
     # Conv layer : output.shape = (batch_size, 80, 4, 4)
     conv_layer5 = ConvLayer(pool_layer2.output, num_filters=nfilters[4], filter_size=filter_size[4], stride=(3, 3))

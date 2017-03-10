@@ -28,20 +28,22 @@ def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='/norm
 
     dataset = np.load(path + dataset)
 
-    train_input = dataset['train_input']
-    train_target = dataset['train_target']
-    valid_input = dataset['valid_input']
-    valid_target = dataset['valid_target']
+    train_input_data = dataset['train_input'] # Shape = (82611, 3, 64, 64)
+    train_target_data = dataset['train_target'] # Shape = (82611, 3, 32, 32)
+    valid_input_data = dataset['valid_input'] # Shape = (40438, 3, 64, 64)
+    valid_target_data = dataset['valid_target'] # Shape = (40438, 3, 32, 32)
 
-    print train_input.shape[0]
-    print valid_input.shape[0]
-    print batch_size
+    # Creating symbolic variables
+    train_input = theano.shared(np.asarray(train_input_data, dtype=theano.config.floatX), borrow=True)
+    train_target = theano.shared(np.asarray(train_target_data, dtype=theano.config.floatX), borrow=True)
+    valid_input = theano.shared(np.asarray(valid_input_data, dtype=theano.config.floatX), borrow=True)
+    valid_target = theano.shared(np.asarray(valid_target_data, dtype=theano.config.floatX), borrow=True)
 
-    n_train_batches = train_input.shape[0] // batch_size
-    n_valid_batches = valid_input.shape[0] // batch_size
+    n_train_batches = train_input.get_value(borrow=True).shape[0] // batch_size # 413 mini-batch of 200 examples
+    n_valid_batches = valid_input.get_value(borrow=True).shape[0] // batch_size # 202 mini-batch of 200 examples
 
     ###################
-    # Build the model #
+    # Building the model #
     ###################
 
     # Symbolic variables
@@ -67,18 +69,16 @@ def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='/norm
     idx = 50  # idx = index in this case
     batch = 5
     predict_target = theano.function([index], output,
-                                     givens={x: valid_input[index * batch: (index + 1) * batch],
-                                             y: valid_target[index * batch: (index + 1) * batch]})
+                                     givens={x: valid_input[index * batch: (index + 1) * batch]})
 
     ###################
     # Train the model #
     ###################
 
-    print('... training')
+    print('... Training')
 
     # early-stopping parameters
-    #patience = 20000  # look as this many minibatches regardless = 48 epochs
-    patience = 2  # look as this many minibatches regardless = 48 epochs
+    patience = 20000  # look as this many minibatches regardless = 48 epochs
     patience_increase = 2  # wait this much longer when a new best is found
     improvement_threshold = 0.995  # a relative improvement of this much is considered significant
     # go through this many minibatches before checking the
@@ -128,8 +128,8 @@ def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='/norm
                     np.savez('best_model.npz', *layers.get_all_param_values(model))
 
                     save += 1
-                    input = valid_input[num_images, :, :, :]
-                    target = valid_target[num_images, :, :, :]
+                    input = valid_input_data[num_images]
+                    target = valid_target_data[num_images]
                     output = predict_target(idx)
                     save_images(input=input, target=target, output=output, nbr_images=len(num_images), iteration=save)
 

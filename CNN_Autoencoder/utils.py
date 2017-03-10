@@ -35,13 +35,14 @@ def save_images(input, target, output, nbr_images, iteration):
     model_assembling = assemble(input, output)
 
     # Save true assembling
-    for i in range(nbr_images):
-        pylab.subplot(1, nbr_images, (i + 1))
-        pylab.axis('off')
-        pylab.imshow(true_assembling[i, :, :, :].transpose(1, 2, 0))
+    if iteration == 1:
+        for i in range(nbr_images):
+            pylab.subplot(1, nbr_images, (i + 1))
+            pylab.axis('off')
+            pylab.imshow(true_assembling[i, :, :, :].transpose(1, 2, 0))
 
-    pylab.savefig('save' + str(iteration) + '_valid_set.png', bbox_inches='tight')
-    Image.open('save' + str(iteration) + '_valid_set.png').save('save' + str(iteration) + '_valid_set.jpg', 'JPEG')
+        pylab.savefig('save' + str(iteration) + '_valid_set.png', bbox_inches='tight')
+        Image.open('save' + str(iteration) + '_valid_set.png').save('save' + str(iteration) + '_valid_set.jpg', 'JPEG')
 
     # Save model assembling
     for i in range(nbr_images):
