@@ -85,7 +85,8 @@ def get_caption():
 # print len(train_caption[0][0].split())  # Number of words for the first caption of the image
 # print train_caption[0][0].split()[0] # First word of the first caption of the first image
 
-# train_caption, valid_caption, vocabulary = get_caption()
+#train_caption, valid_caption, vocabulary = get_caption()
+#print train_caption[82400]
 # print train_caption[0]
 # print train_caption[6]
 # print valid_caption[0]
@@ -174,8 +175,12 @@ def get_batch(caption_dict, vocabulary_list, idx, nb_caption, batch_size):
             batch[iterator, :] = index
             iterator += 1
 
+    batch = batch.astype('int32')
 
-def get_batches(batch_size=200, nb_caption=1):
+    return batch
+
+
+def get_batches(batch_size=200, nb_caption='max'):
     '''
             Create matrix mini-batches for the input of the network
             :param batch_size: Number of images
@@ -197,7 +202,28 @@ def get_batches(batch_size=200, nb_caption=1):
         train_mini_batches.append(mini_batch)
 
     for j in range(n_valid_batches):
-        mini_batch = get_batch(valid_caption, vocabulary, i, nb_caption, batch_size)
+        mini_batch = get_batch(valid_caption, vocabulary, j, nb_caption, batch_size)
         valid_mini_batches.append(mini_batch)
 
     return train_mini_batches, valid_mini_batches
+
+
+train_caption, valid_caption, vocabulary = get_caption()
+
+print train_caption[0]
+print len(vocabulary)
+print vocabulary[:50]
+
+
+train_mini_batches, valid_mini_batches = get_batches()
+
+print len(train_mini_batches)
+print len(valid_mini_batches)
+print train_mini_batches[0].shape
+print train_mini_batches[-1].shape
+print valid_mini_batches[0].shape
+print valid_mini_batches[-1].shape
+
+print train_mini_batches[0][0,:]
+print train_mini_batches[0][1,:]
+print valid_mini_batches[-1][-1,:]
