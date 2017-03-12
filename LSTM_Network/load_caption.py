@@ -1,9 +1,6 @@
 import os
-import glob
-import theano
 import numpy as np
 import cPickle as pkl
-import PIL.Image as Image
 from utils import get_path
 
 
@@ -74,45 +71,6 @@ def get_caption():
     vocabulary = ordered_list(vocabulary)
 
     return train_caption, valid_caption, vocabulary
-
-
-# train_caption = load_caption()
-# print len(train_caption)  # 82611 = nbr images
-# print train_caption[0]  # Captions for the first image
-# print len(train_caption[0])  # Number of captions for the first image
-# print train_caption[0][0]  # First caption of the first image
-# print train_caption[0][0].split()  # List of words for the first caption of the first image
-# print len(train_caption[0][0].split())  # Number of words for the first caption of the image
-# print train_caption[0][0].split()[0] # First word of the first caption of the first image
-
-#train_caption, valid_caption, vocabulary = get_caption()
-#print train_caption[82400]
-# print train_caption[0]
-# print train_caption[6]
-# print valid_caption[0]
-# print len(train_vocabulary)
-# print len(valid_vocabulary)
-# print len(vocabulary)
-# for i in range(10):
-#    print vocabulary[i]
-# for i in range(10):
-# for i in range(10):
-#    print train_vocabulary[i]
-# for i in range(10):
-#    print valid_vocabulary[i]
-# print (train_vocabulary.index('food'))
-
-# train_caption, valid_caption = load_caption()
-# print train_caption[0][0]
-# train_caption[0][0] = reshape(train_caption[0][0])
-# print train_caption[0][0]
-
-# sentence1 = 'BonJour JULIAN , ZA " IDI'
-# print sentence1
-# print len(sentence1.split())
-# sentence1 = reshape(sentence1)
-# print sentence1
-# print len(sentence1.split())
 
 
 def get_length(caption_dict, idx, nb_caption, batch_size):
@@ -206,24 +164,3 @@ def get_batches(batch_size=200, nb_caption='max'):
         valid_mini_batches.append(mini_batch)
 
     return train_mini_batches, valid_mini_batches
-
-
-train_caption, valid_caption, vocabulary = get_caption()
-
-print train_caption[0]
-print len(vocabulary)
-print vocabulary[:50]
-
-
-train_mini_batches, valid_mini_batches = get_batches()
-
-print len(train_mini_batches)
-print len(valid_mini_batches)
-print train_mini_batches[0].shape
-print train_mini_batches[-1].shape
-print valid_mini_batches[0].shape
-print valid_mini_batches[-1].shape
-
-print train_mini_batches[0][0,:]
-print train_mini_batches[0][1,:]
-print valid_mini_batches[-1][-1,:]
