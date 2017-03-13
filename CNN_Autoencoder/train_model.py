@@ -13,7 +13,7 @@ from utils import get_path
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='/normalized_mscoco_dataset.npz'):
+def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='normalized_mscoco_dataset.npz'):
     '''
                     Function that compute the training of the model
                     '''
