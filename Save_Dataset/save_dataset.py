@@ -4,6 +4,7 @@ import theano
 import numpy as np
 import cPickle as pkl
 import PIL.Image as Image
+from utils import get_path
 
 theano.config.floatX = 'float32'
 
@@ -164,5 +165,46 @@ def save_dataset(normalize=True, caption=True):
             pkl.dump(valid_caption, f)
 
 
+def split_dataset(dataset='normalized_mscoco_dataset.npz', train_size=1400, valid_size=1600):
+    '''
+                Split the dataset into small tensors to save memory during training
+                To implement this function, user first has to implement the save_dataset() method
+                '''
+
+    path = get_path()
+    dataset = np.load(path + dataset)
+
+    train_input = dataset['train_input']  # Shape = (82611, 3, 64, 64)
+    train_target = dataset['train_target']  # Shape = (82611, 3, 32, 32)
+    valid_input = dataset['valid_input']  # Shape = (40438, 3, 64, 64)
+    valid_target = dataset['valid_target']  # Shape = (40438, 3, 32, 32)
+
+    nb_train_saving = train_input.shape[0] // train_size  # 59
+    nb_valid_saving = valid_input.shape[0] // valid_size  # 25
+
+    for i in range(nb_train_saving):  # 82600 images in total
+        mini_train_input = train_input[i * train_size: (i + 1) * train_size]
+        mini_train_target = train_target[i * train_size: (i + 1) * train_size]
+
+        np.save('train_input_' + str(i), mini_train_input)  # Shape = (1400, 3, 64, 64)
+        np.save('train_target_' + str(i), mini_train_target)  # Shape = (1400, 3, 64, 64)
+
+    for j in range(nb_valid_saving + 1):  # 40400 images in total
+        if j == nb_valid_saving:
+            mini_valid_input = valid_input[j * valid_size: j * valid_size + 400]
+            mini_valid_target = valid_target[j * valid_size: j * valid_size + 400]
+
+            np.save('valid_input_' + str(j), mini_valid_input)  # Shape = (400, 3, 64, 64)
+            np.save('valid_target_' + str(j), mini_valid_target)  # Shape = (400, 3, 64, 64)
+
+        else:
+            mini_valid_input = valid_input[j * valid_size: (j + 1) * valid_size]
+            mini_valid_target = valid_target[j * valid_size: (j + 1) * valid_size]
+
+            np.save('valid_input_' + str(j), mini_valid_input)  # Shape = (1600, 3, 64, 64)
+            np.save('valid_target_' + str(j), mini_valid_target)  # Shape = (1600, 3, 64, 64)
+
+
 if __name__ == '__main__':
-    save_dataset()
+    # save_dataset() # Implement this function first to save the whole dataset in a big file .npz
+    split_dataset()
