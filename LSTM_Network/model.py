@@ -9,6 +9,7 @@ import numpy as np
 import lasagne
 import lasagne.layers as layers
 from lasagne.nonlinearities import rectify
+from load_caption import get_batches
 
 
 #########################
@@ -99,47 +100,55 @@ class LSTMLayer(object):
                                        only_return_final=only_return_final)
 
 
+def build_model(input_var=None, nfilters=[60, 30, 10, 3], filter_size=[3, 3, 2, 4], batch_size=200, nb_caption=1,
+                embedding_size=400):
+    '''
+            :param batch_size: number of images
+            :param nb_caption: number of caption used per image
+    '''
 
-def build_model(input_var=None, input_channels=3, nfilters=[60, 30, 10, 3],
-                filter_size=[3, 3, 2, 4]):
+
     ###############################
     # Build Network Configuration #
     ###############################
 
     print '... Building the model'
 
-    # Input of the network : shape = (batch_size, 3, 64, 64)
-    input_layer = InputLayer(shape=(None, input_channels, 64, 64), input_var=input_var)
+    # Input of the network : shape = (tot_nb_caption, seq_length)
+    input_layer = InputLayer(shape=(None, None), input_var=input_var)
 
-    embedded_layer = EmbeddingLayer()
+    # Embedding layer : output.shape = (tot_nb_caption, seq_length, embedding_size)
+    train_mini_batches, valid_mini_batches, vocab_length = get_batches(batch_size=batch_size, nb_caption=nb_caption)
+    embedded_layer = EmbeddingLayer(input_layer.output, vocab_length, embedding_size)
 
-    lstm_layer = LSTMLayer()
+    # LSTM layer : output.shape = (tot_nb_caption, n_hidden)
+    lstm_layer = LSTMLayer(embedded_layer.output, n_hidden=500)
 
-    # Dense Layer : output.shape = (batch_size, 350)
-    dense_layer1 = DenseLayer(layers.FlattenLayer(pool_layer3.output), num_units=350)
+    # Dense Layer : output.shape = (tot_nb_caption, 350)
+    dense_layer1 = DenseLayer(lstm_layer.output, num_units=350)
 
-    # Dense Layer : output.shape = (batch_size, 350)
+    # Dense Layer : output.shape = (tot_nb_caption, 350)
     dense_layer2 = DenseLayer(dense_layer1.output, num_units=350)
 
-    # Reshape layer : output.shape = (batch_size, 350, 1, 1)
+    # Reshape layer : output.shape = (tot_nb_caption, 350, 1, 1)
     reshape_layer = layers.ReshapeLayer(dense_layer2.output, (input_var.shape[0], 350, 1, 1))
 
-    # Tranposed conv layer : output.shape = (batch_size, 60, 3, 3)
+    # Tranposed conv layer : output.shape = (tot_nb_caption, 60, 3, 3)
     transconv_layer1 = TransposedConvLayer(reshape_layer, num_filters=nfilters[0], filter_size=filter_size[0])
 
-    # Tranposed conv layer : output.shape = (batch_size, 30, 7, 7)
+    # Tranposed conv layer : output.shape = (tot_nb_caption, 30, 7, 7)
     transconv_layer2 = TransposedConvLayer(transconv_layer1.output, num_filters=nfilters[1], filter_size=filter_size[1])
 
-    # Unpool layer : output.shape = (batch_size, 30, 14, 14)
+    # Unpool layer : output.shape = (tot_nb_caption, 30, 14, 14)
     unpool_layer1 = UnpoolLayer(transconv_layer2.output)
 
-    # Tranposed conv layer : output.shape = (batch_size, 10, 15, 15)
+    # Tranposed conv layer : output.shape = (tot_nb_caption, 10, 15, 15)
     transconv_layer3 = TransposedConvLayer(unpool_layer1.output, num_filters=nfilters[2], filter_size=filter_size[2],
                                            stride=(1, 1))
 
-    # Tranposed conv layer : output.shape = (batch_size, 3, 32, 32)
+    # Tranposed conv layer : output.shape = (tot_nb_caption, 3, 32, 32)
     transconv_layer4 = TransposedConvLayer(transconv_layer3.output, num_filters=nfilters[3], filter_size=filter_size[3])
 
-    return transconv_layer4.output
+    return transconv_layer4.output, train_mini_batches, valid_mini_batches
 
 

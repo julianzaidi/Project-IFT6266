@@ -138,7 +138,7 @@ def get_batch(caption_dict, vocabulary_list, idx, nb_caption, batch_size):
     return batch
 
 
-def get_batches(batch_size=200, nb_caption='max'):
+def get_batches(batch_size=200, nb_caption=1):
     '''
             Create matrix mini-batches for the input of the network
             :param batch_size: Number of images
@@ -147,6 +147,7 @@ def get_batches(batch_size=200, nb_caption='max'):
 
     train_caption, valid_caption, vocabulary = get_caption()
 
+    vocab_length = len(vocabulary)
     nb_train_images = len(train_caption)
     nb_valid_images = len(valid_caption)
     train_mini_batches = []
@@ -163,4 +164,4 @@ def get_batches(batch_size=200, nb_caption='max'):
         mini_batch = get_batch(valid_caption, vocabulary, j, nb_caption, batch_size)
         valid_mini_batches.append(mini_batch)
 
-    return train_mini_batches, valid_mini_batches
+    return train_mini_batches, valid_mini_batches, vocab_length
