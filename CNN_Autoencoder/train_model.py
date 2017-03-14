@@ -116,10 +116,7 @@ def train_model(learning_rate=0.01, n_epochs=5, batch_size=200):
             print '... saving model and valid images'
 
             np.savez('best_model.npz', *layers.get_all_param_values(model))
-            print 'input shape', input.shape
-            print 'target shape', target.shape
             output = predict_target(input)
-            print 'output shape', output.shape
             save_images(input=input, target=target, output=output, nbr_images=len(num_images), iteration=epoch)
 
     end_time = timeit.default_timer()
