@@ -13,34 +13,36 @@ from utils import get_path
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='normalized_mscoco_dataset.npz'):
+def get_train_data(path, input_path, target_path, iteration):
+    train_input = np.load(path + input_path + iteration + '.npy')
+    train_target = np.load(path + target_path + iteration + '.npy')
+
+    return train_input, train_target
+
+
+def get_valid_data(path, input_path, target_path, iteration):
+    valid_input = np.load(path + input_path + iteration + '.npy')
+    valid_target = np.load(path + target_path + iteration + '.npy')
+
+    return valid_input, valid_target
+
+
+def train_model(learning_rate=0.01, n_epochs=5, batch_size=200):
     '''
                     Function that compute the training of the model
                     '''
 
-    #######################
-    # Loading the dataset #
-    #######################
+    ###########################################
+    # Writting what we know about the dataset #
+    ###########################################
 
-    path = get_path()
-
-    print '... Loading data'
-
-    dataset = np.load(path + dataset)
-
-    train_input_data = dataset['train_input'] # Shape = (82611, 3, 64, 64)
-    train_target_data = dataset['train_target'] # Shape = (82611, 3, 32, 32)
-    valid_input_data = dataset['valid_input'] # Shape = (40438, 3, 64, 64)
-    valid_target_data = dataset['valid_target'] # Shape = (40438, 3, 32, 32)
-
-    # Creating symbolic variables
-    train_input = theano.shared(np.asarray(train_input_data, dtype=theano.config.floatX), borrow=True)
-    train_target = theano.shared(np.asarray(train_target_data, dtype=theano.config.floatX), borrow=True)
-    valid_input = theano.shared(np.asarray(valid_input_data, dtype=theano.config.floatX), borrow=True)
-    valid_target = theano.shared(np.asarray(valid_target_data, dtype=theano.config.floatX), borrow=True)
-
-    n_train_batches = train_input.get_value(borrow=True).shape[0] // batch_size # 413 mini-batch of 200 examples
-    n_valid_batches = valid_input.get_value(borrow=True).shape[0] // batch_size # 202 mini-batch of 200 examples
+    image_path = get_path()
+    train_input_path = 'train_input_'
+    train_target_path = 'train_target_'
+    valid_input_path = 'valid_input_'
+    valid_target_path = 'valid_target_'
+    train_save = 59  # Total number of training files
+    valid_save = 26  # Total number of validation files
 
     ###################
     # Building the model #
@@ -49,7 +51,6 @@ def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='norma
     # Symbolic variables
     x = T.tensor4('x', dtype=theano.config.floatX)
     y = T.tensor4('y', dtype=theano.config.floatX)
-    index = T.lscalar()
 
     # Creation of the model
     model = build_model(input_var=x)
@@ -59,18 +60,9 @@ def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='norma
     updates = lasagne.updates.adam(loss, params, learning_rate=learning_rate)
 
     # Creation of theano functions
-    train_model = theano.function([index], loss, updates=updates, allow_input_downcast=True,
-                                  givens={x: train_input[index * batch_size: (index + 1) * batch_size],
-                                          y: train_target[index * batch_size: (index + 1) * batch_size]})
-
-    valid_loss = theano.function([index], loss, allow_input_downcast=True,
-                                 givens={x: valid_input[index * batch_size: (index + 1) * batch_size],
-                                         y: valid_target[index * batch_size: (index + 1) * batch_size]})
-
-    idx = 50  # idx = index in this case
-    batch = 5
-    predict_target = theano.function([index], output, allow_input_downcast=True,
-                                     givens={x: valid_input[index * batch: (index + 1) * batch]})
+    train_model = theano.function([x, y], loss, updates=updates, allow_input_downcast=True)
+    valid_loss = theano.function([x, y], loss, allow_input_downcast=True)
+    predict_target = theano.function([x], output, allow_input_downcast=True)
 
     ###################
     # Train the model #
@@ -78,71 +70,63 @@ def train_model(learning_rate=0.01, n_epochs=200, batch_size=200, dataset='norma
 
     print('... Training')
 
-    # early-stopping parameters
-    patience = 20000  # look as this many minibatches regardless = 48 epochs
-    patience_increase = 2  # wait this much longer when a new best is found
-    improvement_threshold = 0.995  # a relative improvement of this much is considered significant
-    # go through this many minibatches before checking the
-    # network on the validation set. In this case we check
-    # at every epoch because n_train_batches = 413
-    validation_frequency = min(n_train_batches, patience // 2)
-
     best_validation_loss = np.inf
     best_iter = 0
+    epoch = 0
 
-    save = 0
+    # Valid images chosen when a better model is found
+    idx = 50
+    batch = 5
+    batch_verification = 0
     num_images = range(idx * batch, (idx + 1) * batch)
+
+    input, target = get_valid_data(image_path, valid_input_path, valid_target_path, str(batch_verification))
+    input = input[idx * batch: (idx + 1) * batch]
+    target = target[idx * batch: (idx + 1) * batch]
 
     start_time = timeit.default_timer()
 
-    epoch = 0
-    done_looping = False
-
-    while (epoch < n_epochs) and (not done_looping):
+    while (epoch < n_epochs):
         epoch = epoch + 1
-        for minibatch_index in range(n_train_batches):
+        n_train_batches = 0
+        for i in range(train_save):
+            train_input, train_target = get_train_data(image_path, train_input_path, train_target_path, str(i))
+            for j in range(train_input.shape[0] // batch_size):
+                train_model(train_input[j * batch_size: (j + 1) * batch_size],
+                            train_target[j * batch_size: (j + 1) * batch_size])
+                n_train_batches += 1
 
-            iter = (epoch - 1) * n_train_batches + minibatch_index
-            cost = train_model(minibatch_index)
+        validation_losses = []
+        for i in range(valid_save):
+            valid_input, valid_target = get_valid_data(image_path, valid_input_path, valid_target_path, str(i))
+            validation_losses.append(valid_loss(valid_input, valid_target))
 
-            if (iter + 1) % validation_frequency == 0:
-                # compute loss on validation set
-                validation_losses = [valid_loss(i) for i in range(n_valid_batches)]
-                this_validation_loss = np.mean(validation_losses)
+        this_validation_loss = np.mean(validation_losses)
 
-                print('epoch %i, minibatch %i/%i, validation error %f %%' %
-                      (epoch, minibatch_index + 1, n_train_batches, this_validation_loss * 100.))
+        print('epoch %i, minibatch %i/%i, validation error %f %%' %
+              (epoch, n_train_batches, n_train_batches, this_validation_loss * 100.))
 
-                # if we got the best validation score until now
-                if this_validation_loss < best_validation_loss:
-                    # improve patience if loss improvement is good enough
-                    if this_validation_loss < best_validation_loss * improvement_threshold:
-                        patience = max(patience, iter * patience_increase)
+        # if we got the best validation score until now
+        if this_validation_loss < best_validation_loss:
+            # save best validation score and iteration number
+            best_validation_loss = this_validation_loss
+            best_iter = epoch
 
-                    # save best validation score and iteration number
-                    best_validation_loss = this_validation_loss
-                    best_iter = iter
+            # save the model and a bunch of valid pictures
+            print '... saving model and valid images'
 
-                    # save the model and a bunch of valid pictures
-                    print '... saving model and valid images'
-
-                    np.savez('best_model.npz', *layers.get_all_param_values(model))
-
-                    save += 1
-                    input = valid_input_data[num_images]
-                    target = valid_target_data[num_images]
-                    output = predict_target(idx)
-                    save_images(input=input, target=target, output=output, nbr_images=len(num_images), iteration=save)
-
-            if patience <= (iter + 1):
-                done_looping = True
-                break
+            np.savez('best_model.npz', *layers.get_all_param_values(model))
+            print 'input shape', input.shape
+            print 'target shape', target.shape
+            output = predict_target(input)
+            print 'output shape', output.shape
+            save_images(input=input, target=target, output=output, nbr_images=len(num_images), iteration=epoch)
 
     end_time = timeit.default_timer()
 
     print('Optimization complete.')
-    print('Best validation score of %f %% obtained at iteration %i' %
-          (best_validation_loss * 100., best_iter + 1))
+    print('Best validation score of %f %% obtained at epoch %i' %
+          (best_validation_loss * 100., best_iter))
     print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
 
 

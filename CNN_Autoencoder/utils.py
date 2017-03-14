@@ -31,18 +31,18 @@ def save_images(input, target, output, nbr_images, iteration):
                     model on the validation set at some periods of training
                     '''
 
-    true_assembling = assemble(input, target)
     model_assembling = assemble(input, output)
 
     # Save true assembling
     if iteration == 1:
+        true_assembling = assemble(input, target)
         for i in range(nbr_images):
             pylab.subplot(1, nbr_images, (i + 1))
             pylab.axis('off')
             pylab.imshow(true_assembling[i, :, :, :].transpose(1, 2, 0))
 
-        pylab.savefig('save' + str(iteration) + '_valid_set.png', bbox_inches='tight')
-        Image.open('save' + str(iteration) + '_valid_set.png').save('save' + str(iteration) + '_valid_set.jpg', 'JPEG')
+        pylab.savefig('epoch' + str(iteration) + '_valid_set.png', bbox_inches='tight')
+        Image.open('epoch' + str(iteration) + '_valid_set.png').save('epoch' + str(iteration) + '_valid_set.jpg', 'JPEG')
 
     # Save model assembling
     for i in range(nbr_images):
@@ -50,8 +50,8 @@ def save_images(input, target, output, nbr_images, iteration):
         pylab.axis('off')
         pylab.imshow(model_assembling[i, :, :, :].transpose(1, 2, 0))
 
-    pylab.savefig('save' + str(iteration) + '_best_model.png', bbox_inches='tight')
-    Image.open('save' + str(iteration) + '_best_model.png').save('save' + str(iteration) + '_best_model.jpg', 'JPEG')
+    pylab.savefig('epoch' + str(iteration) + '_best_model.png', bbox_inches='tight')
+    Image.open('epoch' + str(iteration) + '_best_model.png').save('epoch' + str(iteration) + '_best_model.jpg', 'JPEG')
 
 
 def get_path():
