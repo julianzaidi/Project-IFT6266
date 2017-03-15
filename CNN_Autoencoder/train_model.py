@@ -113,7 +113,7 @@ def train_model(learning_rate=0.01, n_epochs=5, batch_size=200):
             best_iter = epoch
 
             # save the model and a bunch of valid pictures
-            print '... saving model and valid images'
+            print ('... saving model and valid images')
 
             np.savez('best_model.npz', *layers.get_all_param_values(model))
             output = predict_target(input)
