@@ -99,7 +99,7 @@ def build_model(input_var=None, input_channels=3, nfilters=[20, 30, 50, 60, 80, 
     # Build Network Configuration #
     ###############################
 
-    print '... Building the model'
+    print ('... Building the model')
 
     # Input of the network : shape = (batch_size, 3, 64, 64)
     input_layer = InputLayer(shape=(None, input_channels, 64, 64), input_var=input_var)
