@@ -55,5 +55,5 @@ def save_images(input, target, output, nbr_images, iteration):
 
 
 def get_path():
-    path = "~/Data/"
+    path = "/home2/ift6ed67/Data/"
     return path
