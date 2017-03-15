@@ -27,7 +27,7 @@ def get_valid_data(path, input_path, target_path, iteration):
     return valid_input, valid_target
 
 
-def train_model(learning_rate=0.01, n_epochs=5, batch_size=200):
+def train_model(learning_rate=0.01, n_epochs=3, batch_size=200):
     '''
                     Function that compute the training of the model
                     '''
