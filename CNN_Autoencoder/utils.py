@@ -1,4 +1,6 @@
-import pylab
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import numpy as np
 import PIL.Image as Image
 
@@ -37,20 +39,20 @@ def save_images(input, target, output, nbr_images, iteration):
     if iteration == 1:
         true_assembling = assemble(input, target)
         for i in range(nbr_images):
-            pylab.subplot(1, nbr_images, (i + 1))
-            pylab.axis('off')
-            pylab.imshow(true_assembling[i, :, :, :].transpose(1, 2, 0))
+            plt.subplot(1, nbr_images, (i + 1))
+            plt.axis('off')
+            plt.imshow(true_assembling[i, :, :, :].transpose(1, 2, 0))
 
-        pylab.savefig('epoch' + str(iteration) + '_valid_set.png', bbox_inches='tight')
+        plt.savefig('epoch' + str(iteration) + '_valid_set.png', bbox_inches='tight')
         Image.open('epoch' + str(iteration) + '_valid_set.png').save('epoch' + str(iteration) + '_valid_set.jpg', 'JPEG')
 
     # Save model assembling
     for i in range(nbr_images):
-        pylab.subplot(1, nbr_images, (i + 1))
-        pylab.axis('off')
-        pylab.imshow(model_assembling[i, :, :, :].transpose(1, 2, 0))
+        plt.subplot(1, nbr_images, (i + 1))
+        plt.axis('off')
+        plt.imshow(model_assembling[i, :, :, :].transpose(1, 2, 0))
 
-    pylab.savefig('epoch' + str(iteration) + '_best_model.png', bbox_inches='tight')
+    plt.savefig('epoch' + str(iteration) + '_best_model.png', bbox_inches='tight')
     Image.open('epoch' + str(iteration) + '_best_model.png').save('epoch' + str(iteration) + '_best_model.jpg', 'JPEG')
 
 
