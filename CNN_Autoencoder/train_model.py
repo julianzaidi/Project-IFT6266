@@ -27,7 +27,7 @@ def get_valid_data(path, input_path, target_path, iteration):
     return valid_input, valid_target
 
 
-def train_model(learning_rate=0.01, n_epochs=1, batch_size=200):
+def train_model(learning_rate=0.01, n_epochs=5, batch_size=200):
     '''
                     Function that compute the training of the model
                     '''
@@ -89,18 +89,15 @@ def train_model(learning_rate=0.01, n_epochs=1, batch_size=200):
     while (epoch < n_epochs):
         epoch = epoch + 1
         n_train_batches = 0
-        #for i in range(train_save):
-        for i in range(1):
+        for i in range(train_save):
             train_input, train_target = get_train_data(image_path, train_input_path, train_target_path, str(i))
-            #for j in range(train_input.shape[0] // batch_size):
-            for j in range(1):
+            for j in range(train_input.shape[0] // batch_size):
                 train_model(train_input[j * batch_size: (j + 1) * batch_size],
                             train_target[j * batch_size: (j + 1) * batch_size])
                 n_train_batches += 1
 
         validation_losses = []
-        #for i in range(valid_save):
-        for i in range(1):
+        for i in range(valid_save):
             valid_input, valid_target = get_valid_data(image_path, valid_input_path, valid_target_path, str(i))
             validation_losses.append(valid_loss(valid_input, valid_target))
 
