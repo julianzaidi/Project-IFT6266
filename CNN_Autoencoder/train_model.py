@@ -20,7 +20,7 @@ def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
     return theano.shared(np.zeros(shape=shape, dtype=dtype), borrow=borrow)
 
 
-def train_model(learning_rate=0.0009, n_epochs=50, batch_size=200, dataset='normalized_mscoco_dataset.npz'):
+def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200, dataset='normalized_mscoco_dataset.npz'):
     '''
             Function that compute the training of the model
             '''
