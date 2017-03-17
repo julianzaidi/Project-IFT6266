@@ -144,7 +144,7 @@ def train_model(learning_rate=0.0009, n_epochs=50, batch_size=200, dataset='norm
 
         validation_losses = []
         for i in range(nb_valid_batch):
-            if nb_valid_batch == 4:
+            if i == 4:
                 small_valid_input.set_value(valid_input_data[batch_size * max_size * i:
                                             batch_size * (i * max_size + min_valid_size)])
                 small_valid_target.set_value(valid_target_data[batch_size * max_size * i:
