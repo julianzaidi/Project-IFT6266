@@ -13,7 +13,7 @@ def get_path(save=False):
     data_path = "/home2/ift6ed67/Data/"
     if save:
         save_path = "/home2/ift6ed67/"
-        return [data_path, save_path]
+        return save_path
     else:
         return data_path
 
@@ -42,7 +42,7 @@ def save_images(input, target, output, nbr_images, iteration):
                     model on the validation set at some periods of training
                     '''
 
-    save_path = get_path(save=True)[1]
+    save_path = get_path(save=True)
     model_assembling = assemble(input, output)
 
     # Save true assembling

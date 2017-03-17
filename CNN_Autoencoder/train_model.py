@@ -125,39 +125,37 @@ def train_model(learning_rate=0.0002, n_epochs=20, batch_size=200, dataset='norm
         epoch = epoch + 1
         n_train_batches = 0
         for i in range(nb_train_batch):
-            # for i in range(1):
             if nb_train_batch == 8:
-                small_train_input.set_value(train_input_data[nb_train_batch * max_size * batch_size:
+                small_train_input.set_value(train_input_data[batch_size * max_size * nb_train_batch:
                                             batch_size * (nb_train_batch * max_size + min_train_size)])
-                small_train_target.set_value(train_target_data[nb_train_batch * max_size * batch_size:
+                small_train_target.set_value(train_target_data[batch_size * max_size * nb_train_batch:
                                              batch_size * (nb_train_batch * max_size + min_train_size)])
                 for j in range(min_train_size):
                     train_small_model(j)
                     n_train_batches += 1
             else:
-                big_train_input.set_value(train_input_data[nb_train_batch * max_size * batch_size:
-                                          batch_size * (nb_train_batch * max_size + max_size)])
-                big_train_target.set_value(train_target_data[nb_train_batch * max_size * batch_size:
-                                           batch_size * (nb_train_batch * max_size + max_size)])
+                big_train_input.set_value(train_input_data[batch_size * max_size * nb_train_batch:
+                                          batch_size * max_size * (nb_train_batch + 1)])
+                big_train_target.set_value(train_target_data[batch_size * max_size * nb_train_batch:
+                                           batch_size * max_size * (nb_train_batch + 1)])
                 for j in range(max_size):
                     train_big_model(j)
                     n_train_batches += 1
 
         validation_losses = []
         for i in range(nb_valid_batch):
-        #for i in range(1):
             if nb_valid_batch == 4:
-                small_valid_input.set_value(valid_input_data[nb_valid_batch * max_size * batch_size:
+                small_valid_input.set_value(valid_input_data[batch_size * max_size * nb_valid_batch:
                                             batch_size * (nb_valid_batch * max_size + min_valid_size)])
-                small_valid_target.set_value(valid_target_data[nb_valid_batch * max_size * batch_size:
+                small_valid_target.set_value(valid_target_data[batch_size * max_size * nb_valid_batch:
                                              batch_size * (nb_valid_batch * max_size + min_valid_size)])
                 for j in range(min_valid_size):
                     validation_losses.append(small_valid_loss(j))
             else:
-                big_valid_input.set_value(valid_input_data[nb_valid_batch * max_size * batch_size:
-                                          batch_size * (nb_valid_batch * max_size + max_size)])
-                big_valid_target.set_value(valid_target_data[nb_valid_batch * max_size * batch_size:
-                                           batch_size * (nb_valid_batch * max_size + max_size)])
+                big_valid_input.set_value(valid_input_data[batch_size * max_size * nb_valid_batch:
+                                                           batch_size * max_size * (nb_valid_batch + 1)])
+                big_valid_target.set_value(valid_target_data[batch_size * max_size * nb_valid_batch:
+                                           batch_size * max_size * (nb_valid_batch + 1)])
                 for j in range(max_size):
                     validation_losses.append(big_valid_loss(j))
 
