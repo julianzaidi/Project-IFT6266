@@ -2,11 +2,20 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
-import PIL.Image as Image
+#import PIL.Image as Image
 
 '''
                 Useful functions to use throughout the project
                 '''
+
+
+def get_path(save=False):
+    data_path = "/home2/ift6ed67/Data/"
+    if save:
+        save_path = "/home2/ift6ed67/"
+        return [data_path, save_path]
+    else:
+        return data_path
 
 
 def assemble(input, target):
@@ -33,6 +42,7 @@ def save_images(input, target, output, nbr_images, iteration):
                     model on the validation set at some periods of training
                     '''
 
+    save_path = get_path(save=True)[1]
     model_assembling = assemble(input, output)
 
     # Save true assembling
@@ -43,8 +53,9 @@ def save_images(input, target, output, nbr_images, iteration):
             plt.axis('off')
             plt.imshow(true_assembling[i, :, :, :].transpose(1, 2, 0))
 
-        plt.savefig('epoch' + str(iteration) + '_valid_set.png', bbox_inches='tight')
-        Image.open('epoch' + str(iteration) + '_valid_set.png').save('epoch' + str(iteration) + '_valid_set.jpg', 'JPEG')
+        plt.savefig(save_path + 'epoch' + str(iteration) + '_valid_set.png', bbox_inches='tight')
+        #Image.open('epoch' + str(iteration) + '_valid_set.png').save('epoch' + str(iteration) + '_valid_set.jpg',
+        #                                                            'JPEG')
 
     # Save model assembling
     for i in range(nbr_images):
@@ -52,10 +63,5 @@ def save_images(input, target, output, nbr_images, iteration):
         plt.axis('off')
         plt.imshow(model_assembling[i, :, :, :].transpose(1, 2, 0))
 
-    plt.savefig('epoch' + str(iteration) + '_best_model.png', bbox_inches='tight')
-    Image.open('epoch' + str(iteration) + '_best_model.png').save('epoch' + str(iteration) + '_best_model.jpg', 'JPEG')
-
-
-def get_path():
-    path = "/home2/ift6ed67/Data/"
-    return path
+    plt.savefig(save_path + 'epoch' + str(iteration) + '_best_model.png', bbox_inches='tight')
+    #Image.open('epoch' + str(iteration) + '_best_model.png').save('epoch' + str(iteration) + '_best_model.jpg', 'JPEG')
