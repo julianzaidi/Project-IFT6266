@@ -102,7 +102,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200, dataset='norma
     idx = 50  # idx = index in this case
     batch = 5
     predict_target = theano.function([index], output, allow_input_downcast=True,
-                                     givens={x: big_valid_input[index * batch: (index + 1) * batch]})
+                                     givens={x: small_valid_input[index * batch: (index + 1) * batch]})
 
     ###################
     # Train the model #
@@ -125,13 +125,13 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200, dataset='norma
         epoch = epoch + 1
         n_train_batches = 0
         for i in range(nb_train_batch):
-            if i == 8:
+            if i == (nb_train_batch - 1):
                 small_train_input.set_value(train_input_data[batch_size * max_size * i:
                                             batch_size * (i * max_size + min_train_size)])
                 small_train_target.set_value(train_target_data[batch_size * max_size * i:
                                              batch_size * (i * max_size + min_train_size)])
                 for j in range(min_train_size):
-                    train_small_model(j)
+                    cost = train_small_model(j)
                     n_train_batches += 1
             else:
                 big_train_input.set_value(train_input_data[batch_size * max_size * i:
@@ -139,12 +139,12 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200, dataset='norma
                 big_train_target.set_value(train_target_data[batch_size * max_size * i:
                                            batch_size * max_size * (i + 1)])
                 for j in range(max_size):
-                    train_big_model(j)
+                    cost = train_big_model(j)
                     n_train_batches += 1
 
         validation_losses = []
         for i in range(nb_valid_batch):
-            if i == 4:
+            if i == (nb_valid_batch - 1):
                 small_valid_input.set_value(valid_input_data[batch_size * max_size * i:
                                             batch_size * (i * max_size + min_valid_size)])
                 small_valid_target.set_value(valid_target_data[batch_size * max_size * i:
@@ -174,7 +174,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200, dataset='norma
             print ('... saving model and valid images')
 
             np.savez('best_model.npz', *layers.get_all_param_values(model))
-            big_valid_input.set_value(valid_input_data[0: 10000])
+            small_valid_input.set_value(valid_input_data[0: 400])
             output = predict_target(idx)
             save_images(input=input, target=target, output=output, nbr_images=len(num_images), iteration=epoch)
 

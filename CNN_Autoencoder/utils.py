@@ -42,7 +42,7 @@ def save_images(input, target, output, nbr_images, iteration):
                     model on the validation set at some periods of training
                     '''
 
-    #save_path = get_path(save=True)
+    save_path = get_path(save=True)
     model_assembling = assemble(input, output)
 
     # Save true assembling
@@ -53,7 +53,7 @@ def save_images(input, target, output, nbr_images, iteration):
             plt.axis('off')
             plt.imshow(true_assembling[i, :, :, :].transpose(1, 2, 0))
 
-        plt.savefig('epoch' + str(iteration) + '_valid_set.png', bbox_inches='tight')
+        plt.savefig(save_path + 'epoch' + str(iteration) + '_valid_set.png', bbox_inches='tight')
         #Image.open('epoch' + str(iteration) + '_valid_set.png').save('epoch' + str(iteration) + '_valid_set.jpg',
         #                                                            'JPEG')
 
@@ -63,5 +63,5 @@ def save_images(input, target, output, nbr_images, iteration):
         plt.axis('off')
         plt.imshow(model_assembling[i, :, :, :].transpose(1, 2, 0))
 
-    plt.savefig('epoch' + str(iteration) + '_best_model.png', bbox_inches='tight')
+    plt.savefig(save_path + 'epoch' + str(iteration) + '_best_model.png', bbox_inches='tight')
     #Image.open('epoch' + str(iteration) + '_best_model.png').save('epoch' + str(iteration) + '_best_model.jpg', 'JPEG')
