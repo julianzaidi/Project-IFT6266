@@ -21,7 +21,7 @@ def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
     return theano.shared(np.zeros(shape=shape, dtype=dtype), borrow=borrow)
 
 
-def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200, dataset='normalized_mscoco_dataset.npz'):
+def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100, dataset='normalized_mscoco_dataset.npz'):
     '''
             Function that compute the training of the model
             '''
@@ -42,6 +42,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200, dataset='norma
     valid_target_data = dataset['valid_target']  # Shape = (40438, 3, 32, 32)
 
     # Creating symbolic variables
+    batch = 200
     max_size = 50
     min_train_size = 13
     min_valid_size = 2
@@ -53,19 +54,19 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200, dataset='norma
     nb_train_batch = 9
     nb_valid_batch = 5
     # Shape = (10000, 3, 64, 64)
-    big_train_input = shared_GPU_data(shape=(batch_size * max_size, input_channel, max_height, max_width))
-    big_valid_input = shared_GPU_data(shape=(batch_size * max_size, input_channel, max_height, max_width))
+    big_train_input = shared_GPU_data(shape=(batch * max_size, input_channel, max_height, max_width))
+    big_valid_input = shared_GPU_data(shape=(batch * max_size, input_channel, max_height, max_width))
     # Shape = (10000, 3, 32, 32)
-    big_train_target = shared_GPU_data(shape=(batch_size * max_size, input_channel, min_height, min_width))
-    big_valid_target = shared_GPU_data(shape=(batch_size * max_size, input_channel, min_height, min_width))
+    big_train_target = shared_GPU_data(shape=(batch * max_size, input_channel, min_height, min_width))
+    big_valid_target = shared_GPU_data(shape=(batch * max_size, input_channel, min_height, min_width))
     # Shape = (2600, 3, 64, 64)
-    small_train_input = shared_GPU_data(shape=(batch_size * min_train_size, input_channel, max_height, max_width))
+    small_train_input = shared_GPU_data(shape=(batch * min_train_size, input_channel, max_height, max_width))
     # Shape = (2600, 3, 32, 32)
-    small_train_target = shared_GPU_data(shape=(batch_size * min_train_size, input_channel, min_height, min_width))
+    small_train_target = shared_GPU_data(shape=(batch * min_train_size, input_channel, min_height, min_width))
     # Shape = (400, 3, 64, 64)
-    small_valid_input = shared_GPU_data(shape=(batch_size * min_valid_size, input_channel, max_height, max_width))
+    small_valid_input = shared_GPU_data(shape=(batch * min_valid_size, input_channel, max_height, max_width))
     # Shape = (400, 3, 32, 32)
-    small_valid_target = shared_GPU_data(shape=(batch_size * min_valid_size, input_channel, min_height, min_width))
+    small_valid_target = shared_GPU_data(shape=(batch * min_valid_size, input_channel, min_height, min_width))
 
     ###################
     # Building the model #
@@ -77,7 +78,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200, dataset='norma
     index = T.lscalar()
 
     # Creation of the model
-    model = build_model2(input_var=x)
+    model = build_model1(input_var=x)
     output = layers.get_output(model, deterministic=True)
     params = layers.get_all_params(model, trainable=True)
     loss = T.mean(objectives.squared_error(output, y))
@@ -127,37 +128,33 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200, dataset='norma
         n_train_batches = 0
         for i in range(nb_train_batch):
             if i == (nb_train_batch - 1):
-                small_train_input.set_value(train_input_data[batch_size * max_size * i:
-                                            batch_size * (i * max_size + min_train_size)])
-                small_train_target.set_value(train_target_data[batch_size * max_size * i:
-                                             batch_size * (i * max_size + min_train_size)])
-                for j in range(min_train_size):
+                small_train_input.set_value(train_input_data[batch * max_size * i:
+                                            batch * (i * max_size + min_train_size)])
+                small_train_target.set_value(train_target_data[batch * max_size * i:
+                                             batch * (i * max_size + min_train_size)])
+                for j in range(2 * min_train_size):
                     cost = train_small_model(j)
                     n_train_batches += 1
             else:
-                big_train_input.set_value(train_input_data[batch_size * max_size * i:
-                                          batch_size * max_size * (i + 1)])
-                big_train_target.set_value(train_target_data[batch_size * max_size * i:
-                                           batch_size * max_size * (i + 1)])
-                for j in range(max_size):
+                big_train_input.set_value(train_input_data[batch * max_size * i: batch * max_size * (i + 1)])
+                big_train_target.set_value(train_target_data[batch * max_size * i: batch * max_size * (i + 1)])
+                for j in range(2 * max_size):
                     cost = train_big_model(j)
                     n_train_batches += 1
 
         validation_losses = []
         for i in range(nb_valid_batch):
             if i == (nb_valid_batch - 1):
-                small_valid_input.set_value(valid_input_data[batch_size * max_size * i:
-                                            batch_size * (i * max_size + min_valid_size)])
-                small_valid_target.set_value(valid_target_data[batch_size * max_size * i:
-                                             batch_size * (i * max_size + min_valid_size)])
-                for j in range(min_valid_size):
+                small_valid_input.set_value(valid_input_data[batch * max_size * i:
+                                            batch * (i * max_size + min_valid_size)])
+                small_valid_target.set_value(valid_target_data[batch * max_size * i:
+                                             batch * (i * max_size + min_valid_size)])
+                for j in range(2 * min_valid_size):
                     validation_losses.append(small_valid_loss(j))
             else:
-                big_valid_input.set_value(valid_input_data[batch_size * max_size * i:
-                                                           batch_size * max_size * (i + 1)])
-                big_valid_target.set_value(valid_target_data[batch_size * max_size * i:
-                                           batch_size * max_size * (i + 1)])
-                for j in range(max_size):
+                big_valid_input.set_value(valid_input_data[batch * max_size * i: batch * max_size * (i + 1)])
+                big_valid_target.set_value(valid_target_data[batch * max_size * i: batch * max_size * (i + 1)])
+                for j in range(2 * max_size):
                     validation_losses.append(big_valid_loss(j))
 
         this_validation_loss = np.mean(validation_losses)
