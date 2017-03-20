@@ -6,7 +6,8 @@ import theano.tensor as T
 import lasagne.layers as layers
 import lasagne.objectives as objectives
 
-from model import build_model
+from model import build_model1
+from model import build_model2
 from utils import save_images
 from utils import get_path
 
@@ -76,7 +77,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200, dataset='norma
     index = T.lscalar()
 
     # Creation of the model
-    model = build_model(input_var=x)
+    model = build_model2(input_var=x)
     output = layers.get_output(model, deterministic=True)
     params = layers.get_all_params(model, trainable=True)
     loss = T.mean(objectives.squared_error(output, y))
