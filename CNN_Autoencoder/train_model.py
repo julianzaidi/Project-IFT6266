@@ -102,9 +102,9 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100, dataset='norma
                                                y: small_valid_target[index * batch_size: (index + 1) * batch_size]})
 
     idx = 50  # idx = index in this case
-    batch = 5
+    pred_batch = 5
     predict_target = theano.function([index], output, allow_input_downcast=True,
-                                     givens={x: small_valid_input[index * batch: (index + 1) * batch]})
+                                     givens={x: small_valid_input[index * pred_batch: (index + 1) * pred_batch]})
 
     ###################
     # Train the model #
@@ -117,7 +117,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100, dataset='norma
     epoch = 0
 
     # Valid images chosen when a better model is found
-    num_images = range(idx * batch, (idx + 1) * batch)
+    num_images = range(idx * pred_batch, (idx + 1) * pred_batch)
     input = valid_input_data[num_images]
     target = valid_target_data[num_images]
 
