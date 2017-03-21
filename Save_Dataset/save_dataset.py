@@ -165,7 +165,7 @@ def save_dataset(normalize=True, caption=True):
             pkl.dump(valid_caption, f)
 
 
-def split_dataset(dataset='normalized_mscoco_dataset.npz', train_size=1400, valid_size=1600):
+def split_dataset(dataset='normalized_mscoco_dataset.npz', train_size=10000, valid_size=10000):
     '''
                 Split the dataset into small tensors to save memory during training
                 To implement this function, user first has to implement the save_dataset() method
@@ -179,15 +179,23 @@ def split_dataset(dataset='normalized_mscoco_dataset.npz', train_size=1400, vali
     valid_input = dataset['valid_input']  # Shape = (40438, 3, 64, 64)
     valid_target = dataset['valid_target']  # Shape = (40438, 3, 32, 32)
 
-    nb_train_saving = train_input.shape[0] // train_size  # 59
-    nb_valid_saving = valid_input.shape[0] // valid_size  # 25
+    nb_train_saving = train_input.shape[0] // train_size  # 8
+    nb_valid_saving = valid_input.shape[0] // valid_size  # 4
 
-    for i in range(nb_train_saving):  # 82600 images in total
-        mini_train_input = train_input[i * train_size: (i + 1) * train_size]
-        mini_train_target = train_target[i * train_size: (i + 1) * train_size]
+    for i in range(nb_train_saving + 1):  # 82600 images in total
+        if i == nb_train_saving:
+            mini_train_input = train_input[i * train_size: i * train_size + 2600]
+            mini_train_target = train_target[i * train_size: i * train_size + 2600]
 
-        np.save('train_input_' + str(i), mini_train_input)  # Shape = (1400, 3, 64, 64)
-        np.save('train_target_' + str(i), mini_train_target)  # Shape = (1400, 3, 64, 64)
+            np.save('train_input_' + str(i), mini_train_input)  # Shape = (2600, 3, 64, 64)
+            np.save('train_target_' + str(i), mini_train_target)  # Shape = (2600, 3, 64, 64)
+
+        else:
+            mini_train_input = train_input[i * train_size: (i + 1) * train_size]
+            mini_train_target = train_target[i * train_size: (i + 1) * train_size]
+
+            np.save('train_input_' + str(i), mini_train_input)  # Shape = (10000, 3, 64, 64)
+            np.save('train_target_' + str(i), mini_train_target)  # Shape = (10000, 3, 64, 64)
 
     for j in range(nb_valid_saving + 1):  # 40400 images in total
         if j == nb_valid_saving:
@@ -201,8 +209,8 @@ def split_dataset(dataset='normalized_mscoco_dataset.npz', train_size=1400, vali
             mini_valid_input = valid_input[j * valid_size: (j + 1) * valid_size]
             mini_valid_target = valid_target[j * valid_size: (j + 1) * valid_size]
 
-            np.save('valid_input_' + str(j), mini_valid_input)  # Shape = (1600, 3, 64, 64)
-            np.save('valid_target_' + str(j), mini_valid_target)  # Shape = (1600, 3, 64, 64)
+            np.save('valid_input_' + str(j), mini_valid_input)  # Shape = (10000, 3, 64, 64)
+            np.save('valid_target_' + str(j), mini_valid_target)  # Shape = (10000, 3, 64, 64)
 
 
 if __name__ == '__main__':

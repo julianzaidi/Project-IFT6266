@@ -95,6 +95,7 @@ class TransposedConvLayer(object):
 
 def build_model1(input_var=None, input_channels=3, nfilters=[20, 30, 50, 60, 80, 60, 30, 10, 3],
                 filter_size=[5, 5, 3, 3, 3, 3, 3, 2, 4]):
+
     ###############################
     # Build Network Configuration #
     ###############################

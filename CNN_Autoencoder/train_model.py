@@ -14,6 +14,20 @@ from utils import get_path
 theano.config.floatX = 'float32'
 
 
+def get_train_data(path, input_path, target_path, iteration):
+    train_input = np.load(path + input_path + iteration + '.npy')
+    train_target = np.load(path + target_path + iteration + '.npy')
+
+    return train_input, train_target
+
+
+def get_valid_data(path, input_path, target_path, iteration):
+    valid_input = np.load(path + input_path + iteration + '.npy')
+    valid_target = np.load(path + target_path + iteration + '.npy')
+
+    return valid_input, valid_target
+
+
 def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
     '''
             Create theano shared variables to be load on the GPU
@@ -21,7 +35,7 @@ def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
     return theano.shared(np.zeros(shape=shape, dtype=dtype), borrow=borrow)
 
 
-def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100, dataset='normalized_mscoco_dataset.npz'):
+def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
     '''
             Function that compute the training of the model
             '''
@@ -34,12 +48,10 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100, dataset='norma
 
     # Load the dataset on the CPU
     data_path = get_path()
-    dataset = np.load(data_path + dataset)
-
-    train_input_data = dataset['train_input']  # Shape = (82611, 3, 64, 64)
-    train_target_data = dataset['train_target']  # Shape = (82611, 3, 32, 32)
-    valid_input_data = dataset['valid_input']  # Shape = (40438, 3, 64, 64)
-    valid_target_data = dataset['valid_target']  # Shape = (40438, 3, 32, 32)
+    train_input_path = 'train_input_'
+    train_target_path = 'train_target_'
+    valid_input_path = 'valid_input_'
+    valid_target_path = 'valid_target_'
 
     # Creating symbolic variables
     batch = 200
@@ -78,7 +90,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100, dataset='norma
     index = T.lscalar()
 
     # Creation of the model
-    model = build_model1(input_var=x)
+    model = build_model2(input_var=x)
     output = layers.get_output(model, deterministic=True)
     params = layers.get_all_params(model, trainable=True)
     loss = T.mean(objectives.squared_error(output, y))
@@ -104,7 +116,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100, dataset='norma
     idx = 50  # idx = index in this case
     pred_batch = 5
     predict_target = theano.function([index], output, allow_input_downcast=True,
-                                     givens={x: small_valid_input[index * pred_batch: (index + 1) * pred_batch]})
+                                     givens={x: big_valid_input[index * pred_batch: (index + 1) * pred_batch]})
 
     ###################
     # Train the model #
@@ -117,9 +129,11 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100, dataset='norma
     epoch = 0
 
     # Valid images chosen when a better model is found
+    batch_verification = 0
     num_images = range(idx * pred_batch, (idx + 1) * pred_batch)
-    input = valid_input_data[num_images]
-    target = valid_target_data[num_images]
+    input_verif, target_verif = get_valid_data(data_path, valid_input_path, valid_target_path, str(batch_verification))
+    input = input_verif[num_images]
+    target = target_verif[num_images]
 
     start_time = timeit.default_timer()
 
@@ -128,33 +142,33 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100, dataset='norma
         n_train_batches = 0
         for i in range(nb_train_batch):
             if i == (nb_train_batch - 1):
-                small_train_input.set_value(train_input_data[batch * max_size * i:
-                                            batch * (i * max_size + min_train_size)])
-                small_train_target.set_value(train_target_data[batch * max_size * i:
-                                             batch * (i * max_size + min_train_size)])
-                for j in range(2 * min_train_size):
+                train_input, train_target = get_train_data(data_path, train_input_path, train_target_path, str(i))
+                small_train_input.set_value(train_input)
+                small_train_target.set_value(train_target)
+                for j in range(min_train_size):
                     cost = train_small_model(j)
                     n_train_batches += 1
             else:
-                big_train_input.set_value(train_input_data[batch * max_size * i: batch * max_size * (i + 1)])
-                big_train_target.set_value(train_target_data[batch * max_size * i: batch * max_size * (i + 1)])
-                for j in range(2 * max_size):
+                train_input, train_target = get_train_data(data_path, train_input_path, train_target_path, str(i))
+                big_train_input.set_value(train_input)
+                big_train_target.set_value(train_target)
+                for j in range(max_size):
                     cost = train_big_model(j)
                     n_train_batches += 1
 
         validation_losses = []
         for i in range(nb_valid_batch):
             if i == (nb_valid_batch - 1):
-                small_valid_input.set_value(valid_input_data[batch * max_size * i:
-                                            batch * (i * max_size + min_valid_size)])
-                small_valid_target.set_value(valid_target_data[batch * max_size * i:
-                                             batch * (i * max_size + min_valid_size)])
-                for j in range(2 * min_valid_size):
+                valid_input, valid_target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
+                small_valid_input.set_value(valid_input)
+                small_valid_target.set_value(valid_target)
+                for j in range(min_valid_size):
                     validation_losses.append(small_valid_loss(j))
             else:
-                big_valid_input.set_value(valid_input_data[batch * max_size * i: batch * max_size * (i + 1)])
-                big_valid_target.set_value(valid_target_data[batch * max_size * i: batch * max_size * (i + 1)])
-                for j in range(2 * max_size):
+                valid_input, valid_target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
+                big_valid_input.set_value(valid_input)
+                big_valid_target.set_value(valid_target)
+                for j in range(max_size):
                     validation_losses.append(big_valid_loss(j))
 
         this_validation_loss = np.mean(validation_losses)
@@ -172,7 +186,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100, dataset='norma
             print ('... saving model and valid images')
 
             np.savez('best_model.npz', *layers.get_all_param_values(model))
-            small_valid_input.set_value(valid_input_data[0: 400])
+            big_valid_input.set_value(input_verif)
             output = predict_target(idx)
             save_images(input=input, target=target, output=output, nbr_images=len(num_images), iteration=epoch)
 
