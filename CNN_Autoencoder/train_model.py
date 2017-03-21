@@ -35,7 +35,7 @@ def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
     return theano.shared(np.zeros(shape=shape, dtype=dtype), borrow=borrow)
 
 
-def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100):
+def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
     '''
             Function that compute the training of the model
             '''
@@ -52,10 +52,12 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100):
     train_target_path = 'train_target_'
     valid_input_path = 'valid_input_'
     valid_target_path = 'valid_target_'
+    nb_train_batch = 9
+    nb_valid_batch = 5
 
     # Creating symbolic variables
     batch = 200
-    max_size = 50
+    max_size = 25
     min_train_size = 13
     min_valid_size = 2
     input_channel = 3
@@ -63,12 +65,10 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100):
     max_width = 64
     min_height = 32
     min_width = 32
-    nb_train_batch = 9
-    nb_valid_batch = 5
-    # Shape = (10000, 3, 64, 64)
+    # Shape = (5000, 3, 64, 64)
     big_train_input = shared_GPU_data(shape=(batch * max_size, input_channel, max_height, max_width))
     big_valid_input = shared_GPU_data(shape=(batch * max_size, input_channel, max_height, max_width))
-    # Shape = (10000, 3, 32, 32)
+    # Shape = (5000, 3, 32, 32)
     big_train_target = shared_GPU_data(shape=(batch * max_size, input_channel, min_height, min_width))
     big_valid_target = shared_GPU_data(shape=(batch * max_size, input_channel, min_height, min_width))
     # Shape = (2600, 3, 64, 64)
@@ -146,11 +146,17 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100):
                     cost = train_small_model(j)
                     n_train_batches += 1
             else:
+                # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
                 input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
-                print (input.dtype)
-                big_train_input.set_value(input[0: 5000])
-                big_train_target.set_value(target[0: 5000])
-                print (i)
+                big_train_input.set_value(input[0: batch * max_size])
+                big_train_target.set_value(target[0: batch * max_size])
+                print i
+                for j in range(max_size):
+                    cost = train_big_model(j)
+                    n_train_batches += 1
+                big_train_input.set_value(input[batch * max_size:])
+                big_train_target.set_value(target[batch * max_size:])
+                print i
                 for j in range(max_size):
                     cost = train_big_model(j)
                     n_train_batches += 1
