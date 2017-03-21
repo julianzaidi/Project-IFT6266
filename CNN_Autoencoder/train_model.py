@@ -35,7 +35,7 @@ def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
     return theano.shared(np.zeros(shape=shape, dtype=dtype), borrow=borrow)
 
 
-def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100):
+def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
     '''
             Function that compute the training of the model
             '''
@@ -116,7 +116,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100):
     idx = 50  # idx = index in this case
     pred_batch = 5
     predict_target = theano.function([index], output, allow_input_downcast=True,
-                                     givens={x: big_valid_input[index * pred_batch: (index + 1) * pred_batch]})
+                                     givens={x: small_valid_input[index * pred_batch: (index + 1) * pred_batch]})
 
     ###################
     # Train the model #
@@ -139,33 +139,36 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100):
         n_train_batches = 0
         for i in range(nb_train_batch):
             if i == (nb_train_batch - 1):
-                train_input, train_target = get_train_data(data_path, train_input_path, train_target_path, str(i))
-                small_train_input.set_value(train_input)
-                small_train_target.set_value(train_target)
-                for j in range(2 * min_train_size):
+                input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
+                print(i)
+                small_train_input.set_value(input)
+                print(i)
+                small_train_target.set_value(target)
+                print(i)
+                for j in range(min_train_size):
                     cost = train_small_model(j)
                     n_train_batches += 1
             else:
-                train_input, train_target = get_train_data(data_path, train_input_path, train_target_path, str(i))
-                big_train_input.set_value(train_input)
-                big_train_target.set_value(train_target)
-                for j in range(2 * max_size):
+                input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
+                big_train_input.set_value(input)
+                big_train_target.set_value(target)
+                for j in range(max_size):
                     cost = train_big_model(j)
                     n_train_batches += 1
 
         validation_losses = []
         for i in range(nb_valid_batch):
             if i == (nb_valid_batch - 1):
-                valid_input, valid_target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
-                small_valid_input.set_value(valid_input)
-                small_valid_target.set_value(valid_target)
-                for j in range(2 * min_valid_size):
+                input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
+                small_valid_input.set_value(input)
+                small_valid_target.set_value(target)
+                for j in range(min_valid_size):
                     validation_losses.append(small_valid_loss(j))
             else:
-                valid_input, valid_target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
-                big_valid_input.set_value(valid_input)
-                big_valid_target.set_value(valid_target)
-                for j in range(2 * max_size):
+                input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
+                big_valid_input.set_value(input)
+                big_valid_target.set_value(target)
+                for j in range(max_size):
                     validation_losses.append(big_valid_loss(j))
 
         this_validation_loss = np.mean(validation_losses)
@@ -184,7 +187,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100):
 
             np.savez('best_model.npz', *layers.get_all_param_values(model))
             input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(batch_verification))
-            big_valid_input.set_value(input)
+            small_valid_input.set_value(input[0: 400])
             input = input[num_images]
             target = target[num_images]
             output = predict_target(idx)
