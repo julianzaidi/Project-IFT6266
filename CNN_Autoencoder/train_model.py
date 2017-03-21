@@ -147,8 +147,10 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100):
                     n_train_batches += 1
             else:
                 input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
+                print (input.dtype)
                 big_train_input.set_value(input[0: 5000])
                 big_train_target.set_value(target[0: 5000])
+                print (i)
                 for j in range(max_size):
                     cost = train_big_model(j)
                     n_train_batches += 1
