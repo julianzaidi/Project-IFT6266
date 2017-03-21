@@ -139,20 +139,20 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
         n_train_batches = 0
         for i in range(nb_train_batch):
             if i == (nb_train_batch - 1):
-                print(i)
                 input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
-                print(i)
                 small_train_input.set_value(input)
-                print(i)
                 small_train_target.set_value(target)
-                print(i)
                 for j in range(min_train_size):
                     cost = train_small_model(j)
                     n_train_batches += 1
             else:
+                print(i)
                 input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
+                print(i)
                 big_train_input.set_value(input)
+                print(i)
                 big_train_target.set_value(target)
+                print(i)
                 for j in range(max_size):
                     cost = train_big_model(j)
                     n_train_batches += 1
