@@ -35,7 +35,7 @@ def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
     return theano.shared(np.zeros(shape=shape, dtype=dtype), borrow=borrow)
 
 
-def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
+def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100):
     '''
             Function that compute the training of the model
             '''
@@ -142,7 +142,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
                 input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
                 small_train_input.set_value(input)
                 small_train_target.set_value(target)
-                for j in range(min_train_size):
+                for j in range(2 * min_train_size):
                     cost = train_small_model(j)
                     n_train_batches += 1
             else:
@@ -153,7 +153,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
                 print(i)
                 big_train_target.set_value(target)
                 print(i)
-                for j in range(max_size):
+                for j in range(2 * max_size):
                     cost = train_big_model(j)
                     n_train_batches += 1
 
@@ -163,13 +163,13 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
                 input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
                 small_valid_input.set_value(input)
                 small_valid_target.set_value(target)
-                for j in range(min_valid_size):
+                for j in range(2 * min_valid_size):
                     validation_losses.append(small_valid_loss(j))
             else:
                 input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
                 big_valid_input.set_value(input)
                 big_valid_target.set_value(target)
-                for j in range(max_size):
+                for j in range(2 * max_size):
                     validation_losses.append(big_valid_loss(j))
 
         this_validation_loss = np.mean(validation_losses)
