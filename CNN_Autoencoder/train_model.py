@@ -139,10 +139,12 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
         n_train_batches = 0
         for i in range(nb_train_batch):
             if i == (nb_train_batch - 1):
+                # Shape = (2600, 3, 64, 64) & Shape = (2600, 3, 32, 32)
                 input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
                 small_train_input.set_value(input)
                 small_train_target.set_value(target)
-                for j in range(2 * min_train_size):
+                print ('train batch ', i)
+                for j in range(min_train_size):
                     cost = train_small_model(j)
                     n_train_batches += 1
             else:
@@ -150,13 +152,13 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
                 input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
                 big_train_input.set_value(input[0: batch * max_size])
                 big_train_target.set_value(target[0: batch * max_size])
-                print (i)
+                print ('train batch ', i, ' part 1')
                 for j in range(max_size):
                     cost = train_big_model(j)
                     n_train_batches += 1
                 big_train_input.set_value(input[batch * max_size:])
                 big_train_target.set_value(target[batch * max_size:])
-                print (i)
+                print ('train batch ', i, 'part 2')
                 for j in range(max_size):
                     cost = train_big_model(j)
                     n_train_batches += 1
@@ -164,16 +166,25 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
         validation_losses = []
         for i in range(nb_valid_batch):
             if i == (nb_valid_batch - 1):
+                # Shape = (400, 3, 64, 64) & Shape = (400, 3, 32, 32)
                 input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
                 small_valid_input.set_value(input)
                 small_valid_target.set_value(target)
-                for j in range(2 * min_valid_size):
+                print ('valid batch ', i)
+                for j in range(min_valid_size):
                     validation_losses.append(small_valid_loss(j))
             else:
+                # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
                 input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
-                big_valid_input.set_value(input)
-                big_valid_target.set_value(target)
-                for j in range(2 * max_size):
+                big_valid_input.set_value(input[0: batch * max_size])
+                big_valid_target.set_value(target[0: batch * max_size])
+                print ('valid batch ', i, 'part 1')
+                for j in range(max_size):
+                    validation_losses.append(big_valid_loss(j))
+                big_valid_input.set_value(input[batch * max_size:])
+                big_valid_target.set_value(target[batch * max_size:])
+                print ('valid batch ', i, 'part 2')
+                for j in range(max_size):
                     validation_losses.append(big_valid_loss(j))
 
         this_validation_loss = np.mean(validation_losses)
@@ -191,8 +202,9 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
             print ('... saving model and valid images')
 
             np.savez('best_model.npz', *layers.get_all_param_values(model))
+            # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
             input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(batch_verification))
-            small_valid_input.set_value(input[0: 400])
+            small_valid_input.set_value(input[0: batch * min_valid_size])
             input = input[num_images]
             target = target[num_images]
             output = predict_target(idx)
