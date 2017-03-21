@@ -6,7 +6,7 @@ import theano.tensor as T
 import lasagne.layers as layers
 import lasagne.objectives as objectives
 
-from model import build_model1
+#from model import build_model1
 from model import build_model2
 from utils import save_images
 from utils import get_path
@@ -35,7 +35,7 @@ def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
     return theano.shared(np.zeros(shape=shape, dtype=dtype), borrow=borrow)
 
 
-def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
+def train_model(learning_rate=0.0009, n_epochs=50, batch_size=200):
     '''
             Function that compute the training of the model
             '''
@@ -143,7 +143,6 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
                 input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
                 small_train_input.set_value(input)
                 small_train_target.set_value(target)
-                print ('train batch ', i)
                 for j in range(min_train_size):
                     cost = train_small_model(j)
                     n_train_batches += 1
@@ -152,13 +151,11 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
                 input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
                 big_train_input.set_value(input[0: batch * max_size])
                 big_train_target.set_value(target[0: batch * max_size])
-                print ('train batch ', i, ' part 1')
                 for j in range(max_size):
                     cost = train_big_model(j)
                     n_train_batches += 1
                 big_train_input.set_value(input[batch * max_size:])
                 big_train_target.set_value(target[batch * max_size:])
-                print ('train batch ', i, 'part 2')
                 for j in range(max_size):
                     cost = train_big_model(j)
                     n_train_batches += 1
@@ -170,7 +167,6 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
                 input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
                 small_valid_input.set_value(input)
                 small_valid_target.set_value(target)
-                print ('valid batch ', i)
                 for j in range(min_valid_size):
                     validation_losses.append(small_valid_loss(j))
             else:
@@ -178,12 +174,10 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
                 input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
                 big_valid_input.set_value(input[0: batch * max_size])
                 big_valid_target.set_value(target[0: batch * max_size])
-                print ('valid batch ', i, 'part 1')
                 for j in range(max_size):
                     validation_losses.append(big_valid_loss(j))
                 big_valid_input.set_value(input[batch * max_size:])
                 big_valid_target.set_value(target[batch * max_size:])
-                print ('valid batch ', i, 'part 2')
                 for j in range(max_size):
                     validation_losses.append(big_valid_loss(j))
 
