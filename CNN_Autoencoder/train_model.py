@@ -35,7 +35,7 @@ def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
     return theano.shared(np.zeros(shape=shape, dtype=dtype), borrow=borrow)
 
 
-def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
+def train_model(learning_rate=0.0009, n_epochs=1, batch_size=100):
     '''
             Function that compute the training of the model
             '''
@@ -131,9 +131,6 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
     # Valid images chosen when a better model is found
     batch_verification = 0
     num_images = range(idx * pred_batch, (idx + 1) * pred_batch)
-    input_verif, target_verif = get_valid_data(data_path, valid_input_path, valid_target_path, str(batch_verification))
-    input = input_verif[num_images]
-    target = target_verif[num_images]
 
     start_time = timeit.default_timer()
 
@@ -145,14 +142,14 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
                 train_input, train_target = get_train_data(data_path, train_input_path, train_target_path, str(i))
                 small_train_input.set_value(train_input)
                 small_train_target.set_value(train_target)
-                for j in range(min_train_size):
+                for j in range(2 * min_train_size):
                     cost = train_small_model(j)
                     n_train_batches += 1
             else:
                 train_input, train_target = get_train_data(data_path, train_input_path, train_target_path, str(i))
                 big_train_input.set_value(train_input)
                 big_train_target.set_value(train_target)
-                for j in range(max_size):
+                for j in range(2 * max_size):
                     cost = train_big_model(j)
                     n_train_batches += 1
 
@@ -162,13 +159,13 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
                 valid_input, valid_target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
                 small_valid_input.set_value(valid_input)
                 small_valid_target.set_value(valid_target)
-                for j in range(min_valid_size):
+                for j in range(2 * min_valid_size):
                     validation_losses.append(small_valid_loss(j))
             else:
                 valid_input, valid_target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
                 big_valid_input.set_value(valid_input)
                 big_valid_target.set_value(valid_target)
-                for j in range(max_size):
+                for j in range(2 * max_size):
                     validation_losses.append(big_valid_loss(j))
 
         this_validation_loss = np.mean(validation_losses)
@@ -186,7 +183,10 @@ def train_model(learning_rate=0.0009, n_epochs=1, batch_size=200):
             print ('... saving model and valid images')
 
             np.savez('best_model.npz', *layers.get_all_param_values(model))
-            big_valid_input.set_value(input_verif)
+            input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(batch_verification))
+            big_valid_input.set_value(input)
+            input = input[num_images]
+            target = target[num_images]
             output = predict_target(idx)
             save_images(input=input, target=target, output=output, nbr_images=len(num_images), iteration=epoch)
 
