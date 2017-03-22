@@ -3,7 +3,6 @@
                 '''
 
 def get_path():
-    image_path = "/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/" \
-                 "Data/"
+    image_path = "your_path"
 
     return image_path
