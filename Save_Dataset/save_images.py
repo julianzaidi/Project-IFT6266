@@ -4,7 +4,6 @@ import theano
 import numpy as np
 import cPickle as pkl
 import PIL.Image as Image
-from utils import get_path
 
 theano.config.floatX = 'float32'
 
@@ -163,6 +162,12 @@ def save_dataset(normalize=True, caption=True):
 
         with open('valid_caption' + '.pkl', 'wb') as f:
             pkl.dump(valid_caption, f)
+
+
+def get_path():
+    path = "your_path"
+
+    return path
 
 
 def split_dataset(dataset='normalized_mscoco_dataset.npz', train_size=10000, valid_size=10000):
