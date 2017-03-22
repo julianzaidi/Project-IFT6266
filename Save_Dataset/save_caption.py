@@ -79,7 +79,7 @@ def save_caption():
         for j in range(nb_caption):
             valid_caption[i][j] = reshape(valid_caption[i][j])
 
-    for i in range(30):
+    for i in range(len(vocab)):
         word = reshape(vocab.items()[i][0])
         if len(word) != 0:
             vocabulary.append(word)
@@ -94,13 +94,13 @@ def save_caption():
 if __name__=='__main__':
     save_caption()
 
-    train_caption = load_obj('train_caption')
-    valid_caption = load_obj('valid_caption')
-    vocabulary = load_obj('vocabulary', extension='.txt')
+    #train_caption = load_obj('train_caption')
+    #valid_caption = load_obj('valid_caption')
+    #vocabulary = load_obj('vocabulary', extension='.txt')
 
-    print len(train_caption)
-    print train_caption[0]
-    print len(valid_caption)
-    print valid_caption[0]
-    print len(vocabulary)
-    print vocabulary
+    #print len(train_caption)
+    #print train_caption[0]
+    #print len(valid_caption)
+    #print valid_caption[0]
+    #print len(vocabulary)
+    #print vocabulary[:30]
