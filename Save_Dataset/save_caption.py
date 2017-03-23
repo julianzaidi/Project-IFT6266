@@ -63,9 +63,10 @@ def save_caption():
             Reshape the caption to lower case without punctuation
             Reshape the vocabulary dictionary and set it in a new vocabulary list
             '''
-    train_caption, valid_caption, vocab = load_caption()
+    train_caption, valid_caption, vocabulary = load_caption()
 
-    vocabulary = []
+    worddict_vocabulary = []
+    my_vocabulary = []
     nb_train_images = len(train_caption)
     nb_valid_images = len(valid_caption)
 
@@ -73,22 +74,33 @@ def save_caption():
         nb_caption = len(train_caption[i])
         for j in range(nb_caption):
             train_caption[i][j] = reshape(train_caption[i][j])
+            split = train_caption[i][j].split()
+            nb_words = len(split)
+            for k in range(nb_words):
+                my_vocabulary.append(split[k])
 
     for i in range(nb_valid_images):
         nb_caption = len(valid_caption[i])
         for j in range(nb_caption):
             valid_caption[i][j] = reshape(valid_caption[i][j])
+            split = valid_caption[i][j].split()
+            nb_words = len(split)
+            for k in range(nb_words):
+                my_vocabulary.append(split[k])
 
-    for i in range(len(vocab)):
-        word = reshape(vocab.items()[i][0])
+    my_vocabulary = ordered_list(my_vocabulary)
+
+    for i in range(len(vocabulary)):
+        word = reshape(vocabulary.items()[i][0])
         if len(word) != 0:
-            vocabulary.append(word)
+            worddict_vocabulary.append(word)
 
-    vocabulary = ordered_list(vocabulary)
+    worddict_vocabulary = ordered_list(worddict_vocabulary)
 
-    save_obj(train_caption, 'train_caption')
-    save_obj(valid_caption, 'valid_caption')
-    save_obj(vocabulary, 'vocabulary', extension='.txt')
+    save_obj(train_caption, 'train_caption')  # Size = 82611
+    save_obj(valid_caption, 'valid_caption')  # Size = 40438
+    save_obj(worddict_vocabulary, 'worddict_vocabulary', extension='.txt')  # Size = 27351
+    save_obj(my_vocabulary, 'my_vocabulary', extension='.txt')  # Size = 30292
 
 
 if __name__=='__main__':
@@ -96,11 +108,14 @@ if __name__=='__main__':
 
     #train_caption = load_obj('train_caption')
     #valid_caption = load_obj('valid_caption')
-    #vocabulary = load_obj('vocabulary', extension='.txt')
+    #worddict_vocabulary = load_obj('worddict_vocabulary', extension='.txt')
+    #my_vocabulary = load_obj('my_vocabulary', extension='.txt')
 
     #print len(train_caption)
     #print train_caption[0]
     #print len(valid_caption)
     #print valid_caption[0]
-    #print len(vocabulary)
-    #print vocabulary[:30]
+    #print len(worddict_vocabulary)
+    #print worddict_vocabulary[:30]
+    #print len(my_vocabulary)
+    #print my_vocabulary[:30]
