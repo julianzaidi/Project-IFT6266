@@ -1,6 +1,6 @@
 import os
 import cPickle as pkl
-from save_images import get_path
+from cnn_autoencoder.utils import get_path, save_obj
 
 
 def load_caption(train="train_caption.pkl", valid="valid_caption.pkl", words="worddict.pkl"):
@@ -41,16 +41,6 @@ def reshape(sentence):
     sentence = sentence.lower().replace('.', '').replace(',', '').replace(';', '').replace(':', '').replace('"', ''). \
         replace('...', '').replace('/', '').replace('\'', '')
     return sentence
-
-
-def save_obj(obj, name, extension='.pkl'):
-    with open(name + extension, 'wb') as f:
-        pkl.dump(obj, f, pkl.HIGHEST_PROTOCOL)
-
-
-def load_obj(name, extension='.pkl'):
-    with open(name + extension, 'rb') as f:
-        return pkl.load(f)
 
 
 def save_caption():
