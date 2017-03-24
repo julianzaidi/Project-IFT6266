@@ -1,11 +1,8 @@
+import sys
 import numpy as np
-from cnn_autoencoder.utils import load_obj
-
-
-def get_path():
-    path = "/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/Data/" \
-           "Hades_Data/"
-    return path
+sys.path.insert(0, '/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/'
+                   'Project_IFT6266_GitHub/cnn_autoencoder')
+from utils import get_path, load_obj
 
 
 def get_length(caption_dict, nb_caption):
