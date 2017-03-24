@@ -2,7 +2,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
-#import PIL.Image as Image
+import cPickle as pkl
+# import PIL.Image as Image
 
 '''
                 Useful functions to use throughout the project
@@ -16,6 +17,16 @@ def get_path(save=False):
         return save_path
     else:
         return data_path
+
+
+def save_obj(obj, name, extension='.pkl'):
+    with open(name + extension, 'wb') as f:
+        pkl.dump(obj, f, pkl.HIGHEST_PROTOCOL)
+
+
+def load_obj(name, extension='.pkl'):
+    with open(name + extension, 'rb') as f:
+        return pkl.load(f)
 
 
 def assemble(input, target):
@@ -42,7 +53,7 @@ def save_images(input, target, output, nbr_images, iteration):
                     model on the validation set at some periods of training
                     '''
 
-    #save_path = get_path(save=True)
+    # save_path = get_path(save=True)
     model_assembling = assemble(input, output)
 
     # Save true assembling
@@ -54,7 +65,7 @@ def save_images(input, target, output, nbr_images, iteration):
             plt.imshow(true_assembling[i, :, :, :].transpose(1, 2, 0))
 
         plt.savefig('epoch' + str(iteration) + '_valid_set.png', bbox_inches='tight')
-        #Image.open('epoch' + str(iteration) + '_valid_set.png').save('epoch' + str(iteration) + '_valid_set.jpg',
+        # Image.open('epoch' + str(iteration) + '_valid_set.png').save('epoch' + str(iteration) + '_valid_set.jpg',
         #                                                            'JPEG')
 
     # Save model assembling
@@ -64,4 +75,4 @@ def save_images(input, target, output, nbr_images, iteration):
         plt.imshow(model_assembling[i, :, :, :].transpose(1, 2, 0))
 
     plt.savefig('epoch' + str(iteration) + '_best_model.png', bbox_inches='tight')
-    #Image.open('epoch' + str(iteration) + '_best_model.png').save('epoch' + str(iteration) + '_best_model.jpg', 'JPEG')
+    # Image.open('epoch' + str(iteration) + '_best_model.png').save('epoch' + str(iteration) + '_best_model.jpg', 'JPEG')
