@@ -1,10 +1,13 @@
 import os
+import sys
 import glob
 import theano
 import numpy as np
 import cPickle as pkl
 import PIL.Image as Image
-from cnn_autoencoder.utils import get_path
+sys.path.insert(0, '/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/'
+                   'Project_IFT6266_GitHub/cnn_autoencoder')
+from utils import get_path
 
 theano.config.floatX = 'float32'
 
