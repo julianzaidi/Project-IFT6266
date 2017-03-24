@@ -1,5 +1,5 @@
 import numpy as np
-from Save_Dataset.save_caption import load_obj
+from cnn_autoencoder.utils import load_obj
 
 
 def get_path():
