@@ -11,7 +11,9 @@ import cPickle as pkl
 
 
 def get_path(save=False):
-    data_path = "/home2/ift6ed67/Data/"
+    data_path = "/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/Data/" \
+                "Hades_Data/"
+    #data_path = "/home2/ift6ed67/Data/"
     if save:
         save_path = "/home2/ift6ed67/"
         return save_path
