@@ -1,11 +1,6 @@
 import os
 import cPickle as pkl
-
-
-def get_path():
-    path = "/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/Data/" \
-           "Useful_Data/"
-    return path
+from save_images import get_path
 
 
 def load_caption(train="train_caption.pkl", valid="valid_caption.pkl", words="worddict.pkl"):
@@ -105,17 +100,3 @@ def save_caption():
 
 if __name__=='__main__':
     save_caption()
-
-    #train_caption = load_obj('train_caption')
-    #valid_caption = load_obj('valid_caption')
-    #worddict_vocabulary = load_obj('worddict_vocabulary', extension='.txt')
-    #my_vocabulary = load_obj('my_vocabulary', extension='.txt')
-
-    #print len(train_caption)
-    #print train_caption[0]
-    #print len(valid_caption)
-    #print valid_caption[0]
-    #print len(worddict_vocabulary)
-    #print worddict_vocabulary[:30]
-    #print len(my_vocabulary)
-    #print my_vocabulary[:30]
