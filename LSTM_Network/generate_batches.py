@@ -5,6 +5,13 @@ sys.path.insert(0, '/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_
 from utils import get_path, load_obj
 
 
+def get_vocab_length():
+    path = get_path()
+    vocabulary = load_obj(path + 'my_vocabulary', extension='.txt')
+
+    return len(vocabulary)
+
+
 def get_length(caption_dict, nb_caption):
     '''
             Determine the length of each caption
@@ -128,3 +135,18 @@ def generate_batches(nb_caption):
             valid_mini_batches.append(batch)
 
     return train_mini_batches, valid_mini_batches
+
+
+if __name__ == '__main__':
+
+    train_mini_batches, valid_mini_batches = generate_batches(1)
+
+    print '---- Train mini batches ----'
+    print len(train_mini_batches)
+    for i in range(len(train_mini_batches)):
+        print train_mini_batches[i].shape
+
+    print '---- Valid mini batches ----'
+    print len(valid_mini_batches)
+    for i in range(len(valid_mini_batches)):
+        print valid_mini_batches[i].shape
