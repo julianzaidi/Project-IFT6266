@@ -1,24 +1,14 @@
+'''
+                Useful functions to use throughout the project
+                '''
+
+import theano
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import cPickle as pkl
 # import PIL.Image as Image
-
-'''
-                Useful functions to use throughout the project
-                '''
-
-
-def get_path(save=False):
-    data_path = "/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/Data/" \
-                "Hades_Data/"
-    #data_path = "/home2/ift6ed67/Data/"
-    if save:
-        save_path = "/home2/ift6ed67/"
-        return save_path
-    else:
-        return data_path
 
 
 def save_obj(obj, name, extension='.pkl'):
@@ -29,6 +19,38 @@ def save_obj(obj, name, extension='.pkl'):
 def load_obj(name, extension='.pkl'):
     with open(name + extension, 'rb') as f:
         return pkl.load(f)
+
+
+def get_path(save=False):
+    data_path = "/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/Data/" \
+                "Hades_Data/"
+    # data_path = "/home2/ift6ed67/Data/"
+    if save:
+        save_path = "/home2/ift6ed67/"
+        return save_path
+    else:
+        return data_path
+
+
+def get_train_data(path, input_path, target_path, iteration):
+    train_input = np.load(path + input_path + iteration + '.npy')
+    train_target = np.load(path + target_path + iteration + '.npy')
+
+    return train_input, train_target
+
+
+def get_valid_data(path, input_path, target_path, iteration):
+    valid_input = np.load(path + input_path + iteration + '.npy')
+    valid_target = np.load(path + target_path + iteration + '.npy')
+
+    return valid_input, valid_target
+
+
+def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
+    '''
+            Create theano shared variables to be load on the GPU
+    '''
+    return theano.shared(np.zeros(shape=shape, dtype=dtype), borrow=borrow)
 
 
 def assemble(input, target):

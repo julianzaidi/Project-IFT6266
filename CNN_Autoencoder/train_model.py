@@ -8,31 +8,13 @@ import lasagne.objectives as objectives
 
 #from model import build_model1
 from model import build_model2
-from utils import save_images
 from utils import get_path
+from utils import save_images
+from utils import get_train_data
+from utils import get_valid_data
+from utils import shared_GPU_data
 
 theano.config.floatX = 'float32'
-
-
-def get_train_data(path, input_path, target_path, iteration):
-    train_input = np.load(path + input_path + iteration + '.npy')
-    train_target = np.load(path + target_path + iteration + '.npy')
-
-    return train_input, train_target
-
-
-def get_valid_data(path, input_path, target_path, iteration):
-    valid_input = np.load(path + input_path + iteration + '.npy')
-    valid_target = np.load(path + target_path + iteration + '.npy')
-
-    return valid_input, valid_target
-
-
-def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
-    '''
-            Create theano shared variables to be load on the GPU
-    '''
-    return theano.shared(np.zeros(shape=shape, dtype=dtype), borrow=borrow)
 
 
 def train_model(learning_rate=0.0009, n_epochs=50, batch_size=200):
