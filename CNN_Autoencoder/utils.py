@@ -21,15 +21,10 @@ def load_obj(name, extension='.pkl'):
         return pkl.load(f)
 
 
-def get_path(save=False):
-    data_path = "/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/Data/" \
-                "Hades_Data/"
-    # data_path = "/home2/ift6ed67/Data/"
-    if save:
-        save_path = "/home2/ift6ed67/"
-        return save_path
-    else:
-        return data_path
+def get_path():
+    data_path = "/home2/ift6ed67/Data/"
+
+    return data_path
 
 
 def get_image(path, input_path, target_path, iteration):
@@ -76,7 +71,6 @@ def save_images(input, target, output, nbr_images, iteration):
                     model on the validation set at some periods of training
                     '''
 
-    # save_path = get_path(save=True)
     model_assembling = assemble(input, output)
 
     # Save true assembling

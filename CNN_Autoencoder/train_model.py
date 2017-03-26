@@ -61,9 +61,9 @@ def train_model(learning_rate=0.0009, n_epochs=50, batch_size=200):
     # Shape = (400, 3, 32, 32)
     small_valid_target = shared_GPU_data(shape=(batch * min_valid_size, input_channel, min_height, min_width))
 
-    ###################
+    ######################
     # Building the model #
-    ###################
+    ######################
 
     # Symbolic variables
     x = T.tensor4('x', dtype=theano.config.floatX)
