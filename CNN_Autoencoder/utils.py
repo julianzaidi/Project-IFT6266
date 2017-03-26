@@ -32,18 +32,17 @@ def get_path(save=False):
         return data_path
 
 
-def get_train_data(path, input_path, target_path, iteration):
-    train_input = np.load(path + input_path + iteration + '.npy')
-    train_target = np.load(path + target_path + iteration + '.npy')
+def get_image(path, input_path, target_path, iteration):
+    input = np.load(path + input_path + iteration + '.npy')
+    target = np.load(path + target_path + iteration + '.npy')
 
-    return train_input, train_target
+    return input, target
 
 
-def get_valid_data(path, input_path, target_path, iteration):
-    valid_input = np.load(path + input_path + iteration + '.npy')
-    valid_target = np.load(path + target_path + iteration + '.npy')
+def get_caption(path, caption_path, iteration, nb_caption):
+    caption = np.load(path + caption_path + iteration + '_caption=' + nb_caption + '.npy')
 
-    return valid_input, valid_target
+    return caption
 
 
 def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):

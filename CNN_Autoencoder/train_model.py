@@ -10,8 +10,7 @@ import lasagne.objectives as objectives
 from model import build_model2
 from utils import get_path
 from utils import save_images
-from utils import get_train_data
-from utils import get_valid_data
+from utils import get_image
 from utils import shared_GPU_data
 
 theano.config.floatX = 'float32'
@@ -122,7 +121,7 @@ def train_model(learning_rate=0.0009, n_epochs=50, batch_size=200):
         for i in range(nb_train_batch):
             if i == (nb_train_batch - 1):
                 # Shape = (2600, 3, 64, 64) & Shape = (2600, 3, 32, 32)
-                input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
+                input, target = get_image(data_path, train_input_path, train_target_path, str(i))
                 small_train_input.set_value(input)
                 small_train_target.set_value(target)
                 for j in range(min_train_size):
@@ -130,7 +129,7 @@ def train_model(learning_rate=0.0009, n_epochs=50, batch_size=200):
                     n_train_batches += 1
             else:
                 # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
-                input, target = get_train_data(data_path, train_input_path, train_target_path, str(i))
+                input, target = get_image(data_path, train_input_path, train_target_path, str(i))
                 big_train_input.set_value(input[0: batch * max_size])
                 big_train_target.set_value(target[0: batch * max_size])
                 for j in range(max_size):
@@ -146,14 +145,14 @@ def train_model(learning_rate=0.0009, n_epochs=50, batch_size=200):
         for i in range(nb_valid_batch):
             if i == (nb_valid_batch - 1):
                 # Shape = (400, 3, 64, 64) & Shape = (400, 3, 32, 32)
-                input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
+                input, target = get_image(data_path, valid_input_path, valid_target_path, str(i))
                 small_valid_input.set_value(input)
                 small_valid_target.set_value(target)
                 for j in range(min_valid_size):
                     validation_losses.append(small_valid_loss(j))
             else:
                 # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
-                input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(i))
+                input, target = get_image(data_path, valid_input_path, valid_target_path, str(i))
                 big_valid_input.set_value(input[0: batch * max_size])
                 big_valid_target.set_value(target[0: batch * max_size])
                 for j in range(max_size):
@@ -177,9 +176,9 @@ def train_model(learning_rate=0.0009, n_epochs=50, batch_size=200):
             # save the model and a bunch of valid pictures
             print ('... saving model and valid images')
 
-            np.savez('best_model.npz', *layers.get_all_param_values(model))
+            np.savez('best_cnn_model.npz', *layers.get_all_param_values(model))
             # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
-            input, target = get_valid_data(data_path, valid_input_path, valid_target_path, str(batch_verification))
+            input, target = get_image(data_path, valid_input_path, valid_target_path, str(batch_verification))
             small_valid_input.set_value(input[0: batch * min_valid_size])
             input = input[num_images]
             target = target[num_images]
