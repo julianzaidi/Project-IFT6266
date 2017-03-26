@@ -7,13 +7,13 @@ import theano.tensor as T
 import lasagne.layers as layers
 import lasagne.objectives as objectives
 
+from model import build_model
 sys.path.insert(0, '/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/'
                    'Project_IFT6266_GitHub/cnn_autoencoder')
 from utils import get_path
 from utils import save_images
 from utils import get_image
 from utils import get_caption
-from model import build_model
 
 theano.config.floatX = 'float32'
 
@@ -89,7 +89,7 @@ def train_model(learning_rate=0.0009, n_epochs=50, nb_caption=1):
         for i in range(nb_train_batch):
         # for i in range(1):
             input, target = get_image(data_path, train_input_path, train_target_path, str(i))
-            caption = get_caption(data_path, train_caption_path, str(i), nb_caption)
+            caption = get_caption(data_path, train_caption_path, str(i), str(nb_caption))
             for j in range(len(caption)):
             #for j in range(1):
                 # Build the target according to the caption
@@ -104,7 +104,7 @@ def train_model(learning_rate=0.0009, n_epochs=50, nb_caption=1):
         for i in range(nb_valid_batch):
         #for i in range(1):
             input, target = get_image(data_path, valid_input_path, valid_target_path, str(i))
-            caption = get_caption(data_path, valid_caption_path, str(i), nb_caption)
+            caption = get_caption(data_path, valid_caption_path, str(i), str(nb_caption))
             for j in range(len(caption)):
             # for j in range(1):
                 # Build the target according to the caption
