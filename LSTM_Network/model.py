@@ -8,8 +8,7 @@ import theano.tensor as T
 import lasagne.layers as layers
 from lasagne.nonlinearities import rectify
 
-sys.path.insert(0, '/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/'
-                   'Project_IFT6266_GitHub/cnn_autoencoder')
+sys.path.insert(0, '/home2/ift6ed67/Project-IFT6266/Save_Dataset')
 from generate_caption_batches import get_vocab_length
 
 

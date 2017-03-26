@@ -8,8 +8,7 @@ import lasagne.layers as layers
 import lasagne.objectives as objectives
 
 from model import build_model
-sys.path.insert(0, '/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/'
-                   'Project_IFT6266_GitHub/cnn_autoencoder')
+sys.path.insert(0, '/home2/ift6ed67/Project-IFT6266/CNN_Autoencoder')
 from utils import get_path
 from utils import save_images
 from utils import get_image
@@ -18,7 +17,7 @@ from utils import get_caption
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate=0.0009, n_epochs=50, nb_caption=1):
+def train_model(learning_rate=0.0009, n_epochs=1, nb_caption=1):
     '''
             Function that compute the training of the model
             '''
