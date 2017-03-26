@@ -2,10 +2,15 @@
         Implementation of a LSTM network to learn the caption
         """
 
+import sys
 import lasagne
+import theano.tensor as T
 import lasagne.layers as layers
 from lasagne.nonlinearities import rectify
-from generate_batches import get_vocab_length
+
+sys.path.insert(0, '/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/'
+                   'Project_IFT6266_GitHub/cnn_autoencoder')
+from generate_caption_batches import get_vocab_length
 
 
 #########################
@@ -96,7 +101,7 @@ class LSTMLayer(object):
                                        only_return_final=only_return_final)
 
 
-def build_model(input_var=None, nfilters=[50, 20, 3], filter_size=[7, 2, 4]):
+def build_model(input_var=T.imatrix(), nfilters=[50, 20, 3], filter_size=[7, 2, 4]):
     '''
             :param batch_size: number of images
             :param nb_caption: number of caption used per image

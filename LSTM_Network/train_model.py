@@ -46,7 +46,7 @@ def train_model(learning_rate=0.0009, n_epochs=50, nb_caption=1):
     ###################
 
     # Symbolic variables
-    x = T.matrix('x', dtype=theano.config.floatX)
+    x = T.imatrix('x')
     y = T.tensor4('y', dtype=theano.config.floatX)
 
     # Creation of the model
@@ -72,14 +72,8 @@ def train_model(learning_rate=0.0009, n_epochs=50, nb_caption=1):
     epoch = 0
 
     # Valid images chosen when a better model is found
-    idx = 50
-    batch = 5
     batch_verification = 0
-    num_images = range(idx * batch, (idx + 1) * batch)
-
-    input, target = get_image(data_path, valid_input_path, valid_target_path, str(batch_verification))
-    verif_input = input[num_images]
-    verif_target = target[num_images]
+    num_images = 2
 
     start_time = timeit.default_timer()
 
@@ -87,32 +81,27 @@ def train_model(learning_rate=0.0009, n_epochs=50, nb_caption=1):
         epoch = epoch + 1
         n_train_batches = 0
         for i in range(nb_train_batch):
-        # for i in range(1):
             input, target = get_image(data_path, train_input_path, train_target_path, str(i))
             caption = get_caption(data_path, train_caption_path, str(i), str(nb_caption))
+            print (target.dtype)
             for j in range(len(caption)):
-            #for j in range(1):
+                print (caption[j].dtype)
                 # Build the target according to the caption
-                caption_target = np.zeros((caption[j].shape[0], 3, 32, 32))
-                for k in range(caption[j].shape[0]):
-                    image = caption[j][k, -1]
-                    caption_target[k] = target[image - i * batch_size]
-                train_model(caption[j], caption_target)
+                image = caption[j][:, -1]
+                caption_target = target[image - i * batch_size]
+                print (caption_target.dtype)
+                train_model(caption[j][:, :-1], caption_target)
                 n_train_batches += 1
 
         validation_losses = []
         for i in range(nb_valid_batch):
-        #for i in range(1):
             input, target = get_image(data_path, valid_input_path, valid_target_path, str(i))
             caption = get_caption(data_path, valid_caption_path, str(i), str(nb_caption))
             for j in range(len(caption)):
-            # for j in range(1):
                 # Build the target according to the caption
-                caption_target = np.zeros((caption[j].shape[0], 3, 32, 32))
-                for k in range(caption[j].shape[0]):
-                    image = caption[j][k, -1]
-                    caption_target[k] = target[image - i * batch_size]
-                validation_losses.append(valid_loss(caption[j], caption_target))
+                image = caption[j][:, -1]
+                caption_target = target[image - i * batch_size]
+                validation_losses.append(valid_loss(caption[j][:, :-1], caption_target))
 
         this_validation_loss = np.mean(validation_losses)
 
@@ -129,8 +118,14 @@ def train_model(learning_rate=0.0009, n_epochs=50, nb_caption=1):
             print ('... saving model and valid images')
 
             np.savez('best_lstm_model.npz', *layers.get_all_param_values(model))
-            output = predict_target(verif_input)
-            save_images(input=verif_input, target=verif_target, output=output, nbr_images=len(num_images),
+
+            input, target = get_image(data_path, valid_input_path, valid_target_path, str(batch_verification))
+            caption = get_caption(data_path, valid_caption_path, str(batch_verification), str(nb_caption))
+            image = caption[0][0:2, -1]
+            caption_input = input[image]
+            caption_target = target[image]
+            output = predict_target(caption[0][0:2, :-1])
+            save_images(input=caption_input, target=caption_target, output=output, nbr_images=num_images,
                         iteration=epoch)
 
     end_time = timeit.default_timer()
