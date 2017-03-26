@@ -1,8 +1,7 @@
 import sys
 import numpy as np
 
-sys.path.insert(0, '/Users/Julian/Desktop/Cours/Polytechnique_Montreal/05_Hiver_2017/IFT6266_Deep_Learning/Project/'
-                   'Project_IFT6266_GitHub/cnn_autoencoder')
+sys.path.insert(0, '/home2/ift6ed67/Project-IFT6266/CNN_Autoencoder')
 from utils import get_path
 from utils import load_obj
 
