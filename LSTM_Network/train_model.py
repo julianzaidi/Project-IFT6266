@@ -80,11 +80,13 @@ def train_model(learning_rate=0.0009, n_epochs=1, nb_caption=1):
         epoch = epoch + 1
         n_train_batches = 0
         for i in range(nb_train_batch):
+            print (i)
             input, target = get_image(data_path, train_input_path, train_target_path, str(i))
             caption = get_caption(data_path, train_caption_path, str(i), str(nb_caption))
             print (target.dtype)
+            print (caption[0].dtype)
             for j in range(len(caption)):
-                print (caption[j].dtype)
+                print (caption[j])
                 # Build the target according to the caption
                 image = caption[j][:, -1]
                 caption_target = target[image - i * batch_size]
@@ -94,12 +96,17 @@ def train_model(learning_rate=0.0009, n_epochs=1, nb_caption=1):
 
         validation_losses = []
         for i in range(nb_valid_batch):
+            print (i)
             input, target = get_image(data_path, valid_input_path, valid_target_path, str(i))
             caption = get_caption(data_path, valid_caption_path, str(i), str(nb_caption))
+            print (target.dtype)
+            print (caption[0].dtype)
             for j in range(len(caption)):
+                print (caption[j])
                 # Build the target according to the caption
                 image = caption[j][:, -1]
                 caption_target = target[image - i * batch_size]
+                print (caption_target.dtype)
                 validation_losses.append(valid_loss(caption[j][:, :-1], caption_target))
 
         this_validation_loss = np.mean(validation_losses)
