@@ -35,7 +35,7 @@ def get_image(path, input_path, target_path, iteration):
 
 
 def get_caption(path, caption_path, iteration, nb_caption):
-    caption = np.load(path + caption_path + iteration + '_caption=' + nb_caption + '.npy')
+    caption = np.load(path + caption_path + iteration + '_caption=' + nb_caption + '.npy', encoding='latin1')
 
     return caption
 
