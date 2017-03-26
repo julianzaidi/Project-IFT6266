@@ -50,6 +50,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, nb_caption=1):
 
     # Creation of the model
     model = build_model(input_var=x)
+    print ('Done')
     output = layers.get_output(model, deterministic=True)
     params = layers.get_all_params(model, trainable=True)
     loss = T.mean(objectives.squared_error(output, y))
