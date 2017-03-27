@@ -37,6 +37,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, nb_caption='max'):
     valid_target_path = 'valid_target_'
     valid_caption_path = 'valid_caption_'
     batch_size = 10000
+    size_max = 6000
     nb_train_batch = 9
     nb_valid_batch = 5
 
@@ -88,8 +89,21 @@ def train_model(learning_rate=0.0009, n_epochs=1, nb_caption='max'):
                 caption_target = target[image - i * batch_size]
                 print (caption[j][:, :-1].shape)
                 print (caption_target.shape)
-                train_model(caption[j][:, :-1], caption_target)
-                n_train_batches += 1
+                if caption[j][:, :-1].shape[0] > size_max:
+                    print ('split')
+                    caption_split = caption[j][:size_max, :-1]
+                    caption_target_split = caption_target[:size_max]
+                    print (caption_split.shape)
+                    print (caption_target_split.shape)
+                    train_model(caption_split, caption_target_split)
+                    caption_split = caption[j][size_max:, :-1]
+                    caption_target_split = caption_target[size_max:]
+                    print (caption_split.shape)
+                    print (caption_target_split.shape)
+                    train_model(caption_split, caption_target_split)
+                else:
+                    train_model(caption[j][:, :-1], caption_target)
+                    n_train_batches += 1
 
         validation_losses = []
         for i in range(nb_valid_batch):
@@ -99,7 +113,15 @@ def train_model(learning_rate=0.0009, n_epochs=1, nb_caption='max'):
                 # Build the target according to the caption
                 image = caption[j][:, -1]
                 caption_target = target[image - i * batch_size]
-                validation_losses.append(valid_loss(caption[j][:, :-1], caption_target))
+                if caption[j][:, :-1].shape[0] > size_max:
+                    caption_split = caption[j][:size_max, :-1]
+                    caption_target_split = caption_target[:size_max]
+                    validation_losses.append(valid_loss(caption_split, caption_target_split))
+                    caption_split = caption[j][:size_max, :-1]
+                    caption_target_split = caption_target[:size_max]
+                    validation_losses.append(valid_loss(caption_split, caption_target_split))
+                else:
+                    validation_losses.append(valid_loss(caption[j][:, :-1], caption_target))
 
         this_validation_loss = np.mean(validation_losses)
 
