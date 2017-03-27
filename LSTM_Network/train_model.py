@@ -101,6 +101,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, nb_caption='max'):
                     print (caption_split.shape)
                     print (caption_target_split.shape)
                     train_model(caption_split, caption_target_split)
+                    n_train_batches += 2
                 else:
                     train_model(caption[j][:, :-1], caption_target)
                     n_train_batches += 1
