@@ -72,7 +72,7 @@ def train_model(learning_rate=0.0009, n_epochs=50, nb_caption='max'):
     epoch = 0
 
     # Valid images chosen when a better model is found
-    batch_verification = 0
+    batch_verification = 4
     num_images = 2
 
     start_time = timeit.default_timer()
@@ -87,22 +87,15 @@ def train_model(learning_rate=0.0009, n_epochs=50, nb_caption='max'):
                 # Build the target according to the caption
                 image = caption[j][:, -1]
                 caption_target = target[image - i * batch_size]
-                #print (caption[j][:, :-1].shape)
-                #print (caption_target.shape)
                 if caption[j][:, :-1].shape[0] > size_max:
-                    #print ('split')
                     for k in range(caption[j][:, :-1].shape[0] // size_max + 1):
                         if (k + 1) * size_max < caption[j][:, :-1].shape[0]:
                             caption_split = caption[j][k * size_max: (k + 1) * size_max, :-1]
                             caption_target_split = caption_target[k * size_max: (k + 1) * size_max]
-                            #print (caption_split.shape)
-                            #print (caption_target_split.shape)
                             train_model(caption_split, caption_target_split)
                         else:
                             caption_split = caption[j][k * size_max: caption[j][:, :-1].shape[0], :-1]
                             caption_target_split = caption_target[k * size_max: caption[j][:, :-1].shape[0]]
-                            #print (caption_split.shape)
-                            #print (caption_target_split.shape)
                             train_model(caption_split, caption_target_split)
                     n_train_batches += k + 1
                 else:
@@ -117,22 +110,15 @@ def train_model(learning_rate=0.0009, n_epochs=50, nb_caption='max'):
                 # Build the target according to the caption
                 image = caption[j][:, -1]
                 caption_target = target[image - i * batch_size]
-                #print (caption[j][:, :-1].shape)
-                #print (caption_target.shape)
                 if caption[j][:, :-1].shape[0] > size_max:
-                    #print ('split')
                     for k in range(caption[j][:, :-1].shape[0] // size_max + 1):
                         if (k + 1) * size_max < caption[j][:, :-1].shape[0]:
                             caption_split = caption[j][k * size_max: (k + 1) * size_max, :-1]
                             caption_target_split = caption_target[k * size_max: (k + 1) * size_max]
-                            #print (caption_split.shape)
-                            #print (caption_target_split.shape)
                             validation_losses.append(valid_loss(caption_split, caption_target_split))
                         else:
                             caption_split = caption[j][k * size_max: caption[j][:, :-1].shape[0], :-1]
                             caption_target_split = caption_target[k * size_max: caption[j][:, :-1].shape[0]]
-                            #print (caption_split.shape)
-                            #print (caption_target_split.shape)
                             validation_losses.append(valid_loss(caption_split, caption_target_split))
                 else:
                     validation_losses.append(valid_loss(caption[j][:, :-1], caption_target))
@@ -153,15 +139,12 @@ def train_model(learning_rate=0.0009, n_epochs=50, nb_caption='max'):
 
             np.savez('best_lstm_model.npz', *layers.get_all_param_values(model))
 
-            input, target = get_image(data_path, valid_input_path, valid_target_path, str(batch_verification))
-            caption = get_caption(data_path, valid_caption_path, str(batch_verification), str(nb_caption))
-            image = caption[0][0:num_images, -1]
+            #input, target = get_image(data_path, valid_input_path, valid_target_path, str(batch_verification))
+            #caption = get_caption(data_path, valid_caption_path, str(batch_verification), str(nb_caption))
+            image = caption[1][0:num_images, -1]
             caption_input = input[image - batch_verification * batch_size]
-            print (caption_input.shape)
             caption_target = target[image - batch_verification * batch_size]
-            print (caption_target.shape)
-            output = predict_target(caption[0][0:num_images, :-1])
-            print (output.shape)
+            output = predict_target(caption[1][0:num_images, :-1])
             save_images(input=caption_input, target=caption_target, output=output, nbr_images=num_images,
                         iteration=epoch)
 
