@@ -37,7 +37,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, nb_caption='max'):
     valid_target_path = 'valid_target_'
     valid_caption_path = 'valid_caption_'
     batch_size = 10000
-    size_max = 3000
+    size_max = 2000
     nb_train_batch = 9
     nb_valid_batch = 5
 
