@@ -155,10 +155,13 @@ def train_model(learning_rate=0.0009, n_epochs=50, nb_caption='max'):
 
             input, target = get_image(data_path, valid_input_path, valid_target_path, str(batch_verification))
             caption = get_caption(data_path, valid_caption_path, str(batch_verification), str(nb_caption))
-            image = caption[0][0:2, -1]
-            caption_input = input[image]
-            caption_target = target[image]
-            output = predict_target(caption[0][0:2, :-1])
+            image = caption[0][0:num_images, -1]
+            caption_input = input[image - batch_verification * batch_size]
+            print (caption_input.shape)
+            caption_target = target[image - batch_verification * batch_size]
+            print (caption_target.shape)
+            output = predict_target(caption[0][0:num_images, :-1])
+            print (output.shape)
             save_images(input=caption_input, target=caption_target, output=output, nbr_images=num_images,
                         iteration=epoch)
 
