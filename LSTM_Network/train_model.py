@@ -37,7 +37,7 @@ def train_model(learning_rate=0.0009, n_epochs=1, nb_caption='max'):
     valid_target_path = 'valid_target_'
     valid_caption_path = 'valid_caption_'
     batch_size = 10000
-    size_max = 6000
+    size_max = 5000
     nb_train_batch = 9
     nb_valid_batch = 5
 
@@ -91,17 +91,20 @@ def train_model(learning_rate=0.0009, n_epochs=1, nb_caption='max'):
                 print (caption_target.shape)
                 if caption[j][:, :-1].shape[0] > size_max:
                     print ('split')
-                    caption_split = caption[j][:size_max, :-1]
-                    caption_target_split = caption_target[:size_max]
-                    print (caption_split.shape)
-                    print (caption_target_split.shape)
-                    train_model(caption_split, caption_target_split)
-                    caption_split = caption[j][size_max:, :-1]
-                    caption_target_split = caption_target[size_max:]
-                    print (caption_split.shape)
-                    print (caption_target_split.shape)
-                    train_model(caption_split, caption_target_split)
-                    n_train_batches += 2
+                    for k in range(caption[j][:, :-1].shape[0] // size_max + 1):
+                        if (k + 1) * size_max < caption[j][:, :-1].shape[0]:
+                            caption_split = caption[j][k * size_max: (k + 1) * size_max, :-1]
+                            caption_target_split = caption_target[k * size_max: (k + 1) * size_max]
+                            print (caption_split.shape)
+                            print (caption_target_split.shape)
+                            train_model(caption_split, caption_target_split)
+                        else:
+                            caption_split = caption[j][k * size_max: caption[j][:, :-1].shape[0], :-1]
+                            caption_target_split = caption_target[k * size_max: caption[j][:, :-1].shape[0]]
+                            print (caption_split.shape)
+                            print (caption_target_split.shape)
+                            train_model(caption_split, caption_target_split)
+                    n_train_batches += k + 1
                 else:
                     train_model(caption[j][:, :-1], caption_target)
                     n_train_batches += 1
@@ -114,13 +117,23 @@ def train_model(learning_rate=0.0009, n_epochs=1, nb_caption='max'):
                 # Build the target according to the caption
                 image = caption[j][:, -1]
                 caption_target = target[image - i * batch_size]
+                print (caption[j][:, :-1].shape)
+                print (caption_target.shape)
                 if caption[j][:, :-1].shape[0] > size_max:
-                    caption_split = caption[j][:size_max, :-1]
-                    caption_target_split = caption_target[:size_max]
-                    validation_losses.append(valid_loss(caption_split, caption_target_split))
-                    caption_split = caption[j][:size_max, :-1]
-                    caption_target_split = caption_target[:size_max]
-                    validation_losses.append(valid_loss(caption_split, caption_target_split))
+                    print ('split')
+                    for k in range(caption[j][:, :-1].shape[0] // size_max + 1):
+                        if (k + 1) * size_max < caption[j][:, :-1].shape[0]:
+                            caption_split = caption[j][k * size_max: (k + 1) * size_max, :-1]
+                            caption_target_split = caption_target[k * size_max: (k + 1) * size_max, :-1]
+                            print (caption_split.shape)
+                            print (caption_target_split.shape)
+                            validation_losses.append(valid_loss(caption_split, caption_target_split))
+                        else:
+                            caption_split = caption[j][k * size_max: caption[j][:, :-1].shape[0], :-1]
+                            caption_target_split = caption_target[k * size_max: caption[j][:, :-1].shape[0], :-1]
+                            print (caption_split.shape)
+                            print (caption_target_split.shape)
+                            validation_losses.append(valid_loss(caption_split, caption_target_split))
                 else:
                     validation_losses.append(valid_loss(caption[j][:, :-1], caption_target))
 
