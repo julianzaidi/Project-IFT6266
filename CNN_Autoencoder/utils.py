@@ -72,13 +72,10 @@ def save_images(input, target, output, nbr_images, iteration):
                     '''
 
     model_assembling = assemble(input, output)
-    print (model_assembling.shape)
 
     # Save true assembling
     if iteration == 1:
         true_assembling = assemble(input, target)
-        print (true_assembling.shape)
-        print (true_assembling[0, :, :, :].shape)
         for i in range(nbr_images):
             plt.subplot(1, nbr_images, (i + 1))
             plt.axis('off')
