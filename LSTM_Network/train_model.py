@@ -86,6 +86,8 @@ def train_model(learning_rate=0.0009, n_epochs=1, nb_caption='max'):
                 # Build the target according to the caption
                 image = caption[j][:, -1]
                 caption_target = target[image - i * batch_size]
+                print (caption[j][:, :-1].shape)
+                print (caption_target.shape)
                 train_model(caption[j][:, :-1], caption_target)
                 n_train_batches += 1
 
