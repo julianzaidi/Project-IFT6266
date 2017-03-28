@@ -17,7 +17,7 @@ from utils import get_caption
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate=0.0009, n_epochs=50, nb_caption='max'):
+def train_model(learning_rate=0.0009, n_epochs=20, nb_caption='max'):
     '''
             Function that compute the training of the model
             '''
