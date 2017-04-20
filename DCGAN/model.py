@@ -121,7 +121,7 @@ def build_generator(input_var=None, nfilters=[1000, 500, 250, 3], filter_size=[3
     return transconv_layer4.output
 
 
-def build_discriminator(input_var=None, input_channels=3, nfilters=[1000, 500, 250, 3], filter_size=[3, 3, 3, 4]):
+def build_discriminator(input_var=None, nfilters=[500, 250, 100, 50, 1], filter_size=[5, 5, 3, 3, 3], input_channels=3):
 
     ###############################
     # Build Network Configuration #
@@ -132,44 +132,31 @@ def build_discriminator(input_var=None, input_channels=3, nfilters=[1000, 500, 2
     # Input of the network : shape = (batch_size, 3, 64, 64)
     input_layer = InputLayer(shape=(None, input_channels, 64, 64), input_var=input_var)
 
-    # Conv layer : output.shape = (batch_size, 30, 60, 60)
-    conv_layer1 = ConvLayer(input_layer.output, num_filters=nfilters[0], filter_size=filter_size[0])
+    # Conv layer : output.shape = (batch_size, 500, 62, 62)
+    conv_layer1 = ConvLayer(input_layer.output, num_filters=nfilters[0], filter_size=filter_size[0], pad=(1, 1))
 
-    # Pooling layer : output.shape = (batch_size, 30, 30, 30)
-    pool_layer1 = PoolLayer(conv_layer1.output)
+    # Conv layer : output.shape = (batch_size, 250, 58, 58)
+    conv_layer2 = ConvLayer(conv_layer1.output, num_filters=nfilters[1], filter_size=filter_size[1])
 
-    # Conv layer : output.shape = (batch_size, 40, 24, 24)
-    conv_layer2 = ConvLayer(pool_layer1.output, num_filters=nfilters[1], filter_size=filter_size[1])
+    # Pooling layer : output.shape = (batch_size, 250, 29, 29)
+    pool_layer1 = PoolLayer(conv_layer2.output)
 
-    # Pooling layer : output.shape = (batch_size, 40, 6, 6)
-    pool_layer2 = PoolLayer(conv_layer2.output, poolsize=(4, 4), mode='average_exc_pad')
+    # Conv layer : output.shape = (batch_size, 100, 27, 27)
+    conv_layer3 = ConvLayer(pool_layer1.output, num_filters=nfilters[2], filter_size=filter_size[2])
 
-    # Conv layer : output.shape = (batch_size, 50, 4, 4)
-    conv_layer3 = ConvLayer(pool_layer2.output, num_filters=nfilters[2], filter_size=filter_size[2])
+    # Conv layer : output.shape = (batch_size, 50, 25, 25)
+    conv_layer4 = ConvLayer(conv_layer3.output, num_filters=nfilters[3], filter_size=filter_size[3])
 
-    # Pooling layer : output.shape = (batch_size, 50, 1, 1)
-    pool_layer3 = PoolLayer(conv_layer3.output, poolsize=(4, 4), mode='average_exc_pad')
+    # Pooling layer : output.shape = (batch_size, 50, 12, 12)
+    pool_layer2 = PoolLayer(conv_layer4.output)
 
-    # Dense Layer : output.shape = (batch_size, 300)
-    dense_layer1 = DenseLayer(layers.FlattenLayer(pool_layer3.output), num_units=300)
+    # Conv layer : output.shape = (batch_size, 1, 4, 4)
+    conv_layer5 = ConvLayer(pool_layer2.output, num_filters=nfilters[4], filter_size=filter_size[4], stride=(3, 3))
 
-    # Dense Layer : output.shape = (batch_size, 300)
-    dense_layer2 = DenseLayer(dense_layer1.output, num_units=300)
+    # Pooling layer : output.shape = (batch_size, 1, 1, 1)
+    pool_layer3 = PoolLayer(conv_layer5.output, poolsize=(4, 4))
 
-    # Reshape layer : output.shape = (batch_size, 300, 1, 1)
-    reshape_layer = layers.ReshapeLayer(dense_layer2.output, (input_var.shape[0], 300, 1, 1))
+    # Reshape layer : output.shape = (batch_size, 1)
+    reshape_layer = layers.ReshapeLayer(pool_layer3.output, (input_var.shape[0], 1))
 
-    # Tranposed conv layer : output.shape = (batch_size, 50, 7, 7)
-    transconv_layer1 = TransposedConvLayer(reshape_layer, num_filters=nfilters[3], filter_size=filter_size[3])
-
-    # Unpool layer : output.shape = (batch_size, 50, 14, 14)
-    unpool_layer1 = UnpoolLayer(transconv_layer1.output)
-
-    # Tranposed conv layer : output.shape = (batch_size, 20, 15, 15)
-    transconv_layer2 = TransposedConvLayer(unpool_layer1.output, num_filters=nfilters[4], filter_size=filter_size[4],
-                                           stride=(1, 1))
-
-    # Tranposed conv layer : output.shape = (batch_size, 3, 32, 32)
-    transconv_layer3 = TransposedConvLayer(transconv_layer2.output, num_filters=nfilters[5], filter_size=filter_size[5])
-
-    return transconv_layer3.output
+    return reshape_layer
