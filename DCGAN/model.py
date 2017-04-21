@@ -5,6 +5,7 @@
 import lasagne
 import lasagne.layers as layers
 from lasagne.nonlinearities import rectify
+from lasagne.nonlinearities import sigmoid
 
 
 #########################
@@ -100,14 +101,11 @@ def build_generator(input_var=None, nfilters=[1000, 500, 250, 3], filter_size=[3
 
     print ('... Building the generator')
 
-    # Input of the network : shape = (batch_size, 4096 = 4*32*32)
-    input_layer = InputLayer(shape=(None, 4096), input_var=input_var)
-
-    # Reshape layer : output.shape = (batch_size, 4096, 1, 1)
-    reshape_layer = layers.ReshapeLayer(input_layer.output, (input_var.shape[0], 4096, 1, 1))
+    # Input of the network : shape = (batch_size, 4096=4*32*32, 1, 1)
+    input_layer = InputLayer(shape=(None, 4096, 1, 1), input_var=input_var)
 
     # Tranposed conv layer : output.shape = (batch_size, 1000, 3, 3)
-    transconv_layer1 = TransposedConvLayer(reshape_layer, num_filters=nfilters[0], filter_size=filter_size[0])
+    transconv_layer1 = TransposedConvLayer(input_layer.output, num_filters=nfilters[0], filter_size=filter_size[0])
 
     # Tranposed conv layer : output.shape = (batch_size, 500, 7, 7)
     transconv_layer2 = TransposedConvLayer(transconv_layer1.output, num_filters=nfilters[1], filter_size=filter_size[1])
@@ -156,7 +154,7 @@ def build_discriminator(input_var=None, nfilters=[500, 250, 100, 50, 1], filter_
     # Pooling layer : output.shape = (batch_size, 1, 1, 1)
     pool_layer3 = PoolLayer(conv_layer5.output, poolsize=(4, 4))
 
-    # Reshape layer : output.shape = (batch_size, 1)
-    reshape_layer = layers.ReshapeLayer(pool_layer3.output, (input_var.shape[0], 1))
+    # Dense Layer : output.shape = (batch_size, 1)
+    dense_layer = DenseLayer(layers.FlattenLayer(pool_layer3.output), num_units=1, activation=sigmoid)
 
-    return reshape_layer
+    return dense_layer.output
