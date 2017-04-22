@@ -101,11 +101,14 @@ def build_generator(input_var=None, nfilters=[1000, 500, 250, 3], filter_size=[3
 
     print ('... Building the generator')
 
-    # Input of the network : shape = (batch_size, 4096=4*32*32, 1, 1)
-    input_layer = InputLayer(shape=(None, 4096, 1, 1), input_var=input_var)
+    # Input of the network : shape = (batch_size, 4096=4*32*32)
+    input_layer = InputLayer(shape=(None, 4096), input_var=input_var)
+
+    # Reshape layer : output.shape = (batch_size, 4096, 1, 1)
+    reshape_layer = layers.ReshapeLayer(input_layer.output, (input_var.shape[0], 4096, 1, 1))
 
     # Tranposed conv layer : output.shape = (batch_size, 1000, 3, 3)
-    transconv_layer1 = TransposedConvLayer(input_layer.output, num_filters=nfilters[0], filter_size=filter_size[0])
+    transconv_layer1 = TransposedConvLayer(reshape_layer, num_filters=nfilters[0], filter_size=filter_size[0])
 
     # Tranposed conv layer : output.shape = (batch_size, 500, 7, 7)
     transconv_layer2 = TransposedConvLayer(transconv_layer1.output, num_filters=nfilters[1], filter_size=filter_size[1])
