@@ -115,6 +115,7 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
         loss_dis = []
         loss_gen = []
         for i in range(nb_train_batch):
+            print (i)
             # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
             input, target = get_image(data_path, train_input_path, train_target_path, str(i))
             # Shape = (10000, 3, 64, 64)
