@@ -27,7 +27,7 @@ from utils import random_sample
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=50, batch_size=200):
+def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, batch_size=200):
     '''
             Function that compute the training of the model
             '''
@@ -105,7 +105,7 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=50,
 
     print('... Training')
 
-    epoch = -1
+    epoch = 0
     nb_train_dis = 25
     nb_train_gen = 10
     start_time = timeit.default_timer()
@@ -162,7 +162,7 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=50,
 
 
         # if we got the best validation score until now
-        if epoch % 5 == 0:
+        if (epoch - 1) % 5 == 0:
             # save the model and a bunch of generated pictures
             print ('... saving model and generated images')
 
