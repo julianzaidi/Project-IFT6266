@@ -28,7 +28,7 @@ from utils import random_sample
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, batch_size=200):
+def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, batch_size=10):
     '''
             Function that compute the training of the model
             '''
@@ -124,27 +124,15 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
             # Shape = (10000, 100)
             sample = random_sample(size=(10000, 100))
             for j in range(nb_block):
-                if j == 0:
-                    for index in range(nb_train_dis):
-                        image.set_value(input[index * batch_size: (index + 1) * batch_size])
-                        random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
-                        loss = train_dis()
-                        loss_dis.append(loss)
-                    for index in range(nb_train_gen):
-                        random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
-                        loss = train_gen()
-                        loss_gen.append(loss)
-
-                else:
-                    for index in range(nb_train_dis, nb_block):  # nb_block = 2*nb_train_dis
-                        image.set_value(input[index * batch_size: (index + 1) * batch_size])
-                        random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
-                        loss = train_dis()
-                        loss_dis.append(loss)
-                    for index in range(nb_train_dis, nb_train_dis + nb_train_gen):
-                        random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
-                        loss = train_gen()
-                        loss_gen.append(loss)
+                for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
+                    image.set_value(input[index * batch_size: (index + 1) * batch_size])
+                    random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
+                    loss = train_dis()
+                    loss_dis.append(loss)
+                for index in range(nb_train_gen * j, nb_train_gen * (j + 1)):
+                    random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
+                    loss = train_gen()
+                    loss_gen.append(loss)
 
         # Plot the learning curve
         ax1 = host_subplot(111, axes_class=AA.Axes)
