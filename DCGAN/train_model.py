@@ -124,12 +124,15 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
             # Shape = (10000, 100)
             sample = random_sample(size=(10000, 100))
             for j in range(nb_block):
+                print (j)
                 for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
+                    print (index)
                     image.set_value(input[index * batch_size: (index + 1) * batch_size])
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_dis()
                     loss_dis.append(loss)
                 for index in range(nb_train_gen * j, nb_train_gen * (j + 1)):
+                    print (index)
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_gen()
                     loss_gen.append(loss)
