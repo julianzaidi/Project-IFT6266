@@ -47,6 +47,19 @@ def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
     return theano.shared(np.zeros(shape=shape, dtype=dtype), borrow=borrow)
 
 
+def random_sample(size=None, dtype="float32"):
+
+    if type(dtype) == str:
+        dtype = np.dtype(dtype).type
+
+    type_max = 1 << np.finfo(dtype).nmant
+    sample = np.empty(size, dtype=dtype)
+    sample[...] = np.random.randint(0, type_max, size=size) / dtype(type_max)
+    if size is None:
+        sample = sample[()]
+    return sample
+
+
 def assemble(input, target):
     '''
                 Assemble the input with the target
