@@ -8,7 +8,6 @@ import lasagne.layers as layers
 # import lasagne.objectives as objectives
 
 import matplotlib
-
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist as AA
@@ -18,12 +17,12 @@ from model import build_generator
 from model import build_discriminator
 
 sys.path.insert(0, '/home2/ift6ed67/Project-IFT6266/CNN_Autoencoder')
-from utils import get_path
-# from utils import save_images
-from utils import get_image
 from utils import shared_GPU_data
-from utils import assemble
 from utils import random_sample
+from utils import get_path
+from utils import get_image
+from utils import assemble
+
 
 theano.config.floatX = 'float32'
 
@@ -61,7 +60,6 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=5, 
     # Symbolic variables
     x_gen = T.matrix('x_gen', dtype=theano.config.floatX)
     x = T.tensor4('x', dtype=theano.config.floatX)
-    # index = T.lscalar()
 
     # Creation of the model
     generator = build_generator(input_var=x_gen)
@@ -138,8 +136,8 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=5, 
         x2 = range(1, len(loss_gen) + 1)
         ax2.set_xlim([x2[0], x2[-1]])
 
-        ax1.set_xlabel('mini batch (Discriminator)', color='g')
-        ax2.set_xlabel('mini batch (Generator)', color='b')
+        ax1.set_xlabel('training iteration (Discriminator)', color='g')
+        ax2.set_xlabel('training iteration (Generator)', color='b')
         ax1.set_ylabel('Loss')
 
         ax1.plot(x1, loss_dis, 'g', label='Discriminator loss')
