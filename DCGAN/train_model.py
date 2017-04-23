@@ -28,7 +28,7 @@ from utils import random_sample
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, batch_size=20):
+def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=5, batch_size=50):
     '''
             Function that compute the training of the model
             '''
@@ -43,13 +43,9 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
     data_path = get_path()
     train_input_path = 'train_input_'
     train_target_path = 'train_target_'
-    # valid_input_path = 'valid_input_'
-    # valid_target_path = 'valid_target_'
     nb_train_batch = 8
 
     # Creating symbolic variables
-    # batch = 200
-    # max_size = 25
     input_channel = 3
     max_height = 64
     max_width = 64
@@ -88,12 +84,6 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
     train_gen = theano.function([], loss_gen, updates=updates_gen, allow_input_downcast=True,
                                 givens={x_gen: random_matrix})
 
-    # valid_dis = theano.function([], loss_dis, allow_input_downcast=True,
-    #                            givens={x: image, x_gen: random_matrix})
-
-    # valid_gen = theano.function([], loss_gen, allow_input_downcast=True,
-    #                            givens={x_gen: random_matrix})
-
     pred_batch = 5
     predict_image = theano.function([], output_gen, allow_input_downcast=True,
                                     givens={x_gen: random_sample(size=(pred_batch, 100))})
@@ -110,7 +100,7 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
     nb_batch = 10000 // batch_size
     nb_block = nb_batch // nb_train_dis
 
-    #start_time = timeit.default_timer()
+    start_time = timeit.default_timer()
 
     while (epoch < n_epochs):
         epoch = epoch + 1
@@ -118,7 +108,6 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
         loss_gen = []
         for i in range(nb_train_batch):
             print (i)
-            start_time = timeit.default_timer()
             # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
             input, target = get_image(data_path, train_input_path, train_target_path, str(i))
             # Shape = (10000, 3, 64, 64)
@@ -138,10 +127,6 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_gen()
                     loss_gen.append(loss)
-            end_time = timeit.default_timer()
-            print('Computation over 10000 examples (1/8 epoch): %.2fm' % ((end_time - start_time) / 60.))
-
-    #end_time = timeit.default_timer()
 
         # Plot the learning curve
         ax1 = host_subplot(111, axes_class=AA.Axes)
@@ -165,7 +150,7 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
 
         plt.savefig('Learning_curve_epoch' + str(epoch))
 
-        if (epoch - 1) % 5 == 0:
+        if epoch % 5 == 0:
             # save the model and a bunch of generated pictures
             print ('... saving model and generated images')
 
@@ -180,10 +165,9 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
 
             plt.savefig('generated_images_epoch' + str(epoch) + '.png', bbox_inches='tight')
 
-
-
+    end_time = timeit.default_timer()
     print('Optimization complete.')
-    #print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
+    print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
 
 
 if __name__ == '__main__':
