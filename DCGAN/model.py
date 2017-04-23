@@ -84,16 +84,16 @@ def build_generator(input_var=None, nfilters=[1024, 512, 256, 128, 3], filter_si
     # Reshape layer : output.shape = (batch_size, 100, 1, 1)
     reshape_layer = layers.ReshapeLayer(input_layer.output, (input_var.shape[0], 100, 1, 1))
 
-    # Tranposed conv layer : output.shape = (batch_size, 412, 4, 4)
+    # Tranposed conv layer : output.shape = (batch_size, 1024, 4, 4)
     transconv_layer1 = TransposedConvLayer(reshape_layer, num_filters=nfilters[0], filter_size=filter_size[0])
 
-    # Tranposed conv layer : output.shape = (batch_size, 212, 8, 8)
+    # Tranposed conv layer : output.shape = (batch_size, 512, 8, 8)
     transconv_layer2 = TransposedConvLayer(transconv_layer1.output, num_filters=nfilters[1], filter_size=filter_size[1])
 
-    # Tranposed conv layer : output.shape = (batch_size, 128, 16, 16)
+    # Tranposed conv layer : output.shape = (batch_size, 256, 16, 16)
     transconv_layer3 = TransposedConvLayer(transconv_layer2.output, num_filters=nfilters[2], filter_size=filter_size[2])
 
-    # Tranposed conv layer : output.shape = (batch_size, 52, 32, 32)
+    # Tranposed conv layer : output.shape = (batch_size, 128, 32, 32)
     transconv_layer4 = TransposedConvLayer(transconv_layer3.output, num_filters=nfilters[3], filter_size=filter_size[3])
 
     # Tranposed conv layer : output.shape = (batch_size, 3, 64, 64)
@@ -114,16 +114,16 @@ def build_discriminator(input_var=None, nfilters=[128, 256, 512, 1024, 100], fil
     # Input of the network : shape = (batch_size, 3, 64, 64)
     input_layer = InputLayer(shape=(None, input_channels, 64, 64), input_var=input_var)
 
-    # Conv layer : output.shape = (batch_size, 52, 32, 32)
+    # Conv layer : output.shape = (batch_size, 128, 32, 32)
     conv_layer1 = ConvLayer(input_layer.output, num_filters=nfilters[0], filter_size=filter_size[0])
 
-    # Conv layer : output.shape = (batch_size, 128, 16, 16)
+    # Conv layer : output.shape = (batch_size, 256, 16, 16)
     conv_layer2 = ConvLayer(conv_layer1.output, num_filters=nfilters[1], filter_size=filter_size[1])
 
-    # Conv layer : output.shape = (batch_size, 212, 8, 8)
+    # Conv layer : output.shape = (batch_size, 512, 8, 8)
     conv_layer3 = ConvLayer(conv_layer2.output, num_filters=nfilters[2], filter_size=filter_size[2])
 
-    # Conv layer : output.shape = (batch_size, 412, 4, 4)
+    # Conv layer : output.shape = (batch_size, 1024, 4, 4)
     conv_layer4 = ConvLayer(conv_layer3.output, num_filters=nfilters[3], filter_size=filter_size[3])
 
     # Conv layer : output.shape = (batch_size, 100, 1, 1)
