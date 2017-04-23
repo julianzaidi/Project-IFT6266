@@ -70,10 +70,10 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
     generator = build_generator(input_var=x_gen)
     params_gen = layers.get_all_params(generator, trainable=True)
     output_gen = layers.get_output(generator, deterministic=True)
-    discriminator = build_discriminator(input_var=output_gen)
+    discriminator = build_discriminator(input_var=x)
     params_dis = layers.get_all_params(discriminator, trainable=True)
-    model_dis = layers.get_output(discriminator, deterministic=True)
-    real_dis = layers.get_output(discriminator, inputs=x, deterministic=True)
+    model_dis = layers.get_output(discriminator, inputs=output_gen, deterministic=True)
+    real_dis = layers.get_output(discriminator, deterministic=True)
     loss_gen = -T.mean(T.log(model_dis))
     loss_dis = -T.mean(T.log(real_dis) + T.log(1 - model_dis))
 
