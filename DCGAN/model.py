@@ -70,7 +70,7 @@ class TransposedConvLayer(object):
                                                    nonlinearity=activation)
 
 
-def build_generator(input_var=None, nfilters=[412, 212, 128, 52, 3], filter_size=[4, 2, 2, 2, 2]):
+def build_generator(input_var=None, nfilters=[1024, 512, 256, 128, 3], filter_size=[4, 2, 2, 2, 2]):
 
     ###############################
     # Build Network Configuration #
@@ -102,7 +102,7 @@ def build_generator(input_var=None, nfilters=[412, 212, 128, 52, 3], filter_size
     return transconv_layer5.output
 
 
-def build_discriminator(input_var=None, nfilters=[52, 128, 212, 412, 100], filter_size=[2, 2, 2, 2, 4],
+def build_discriminator(input_var=None, nfilters=[128, 256, 512, 1024, 100], filter_size=[2, 2, 2, 2, 4],
                         input_channels=3):
 
     ###############################
