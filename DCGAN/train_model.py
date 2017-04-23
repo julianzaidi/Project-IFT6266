@@ -5,9 +5,10 @@ import lasagne
 import numpy as np
 import theano.tensor as T
 import lasagne.layers as layers
-import lasagne.objectives as objectives
+# import lasagne.objectives as objectives
 
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist as AA
@@ -18,7 +19,7 @@ from model import build_discriminator
 
 sys.path.insert(0, '/home2/ift6ed67/Project-IFT6266/CNN_Autoencoder')
 from utils import get_path
-from utils import save_images
+# from utils import save_images
 from utils import get_image
 from utils import shared_GPU_data
 from utils import assemble
@@ -42,20 +43,20 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
     data_path = get_path()
     train_input_path = 'train_input_'
     train_target_path = 'train_target_'
-    valid_input_path = 'valid_input_'
-    valid_target_path = 'valid_target_'
+    # valid_input_path = 'valid_input_'
+    # valid_target_path = 'valid_target_'
     nb_train_batch = 8
 
     # Creating symbolic variables
-    batch = 200
-    max_size = 25
+    # batch = 200
+    # max_size = 25
     input_channel = 3
     max_height = 64
     max_width = 64
     # Shape = (5000, 3, 64, 64)
-    image = shared_GPU_data(shape=(batch * max_size, input_channel, max_height, max_width))
+    image = shared_GPU_data(shape=(batch_size, input_channel, max_height, max_width))
     # Shape = (5000, 100)
-    random_matrix = shared_GPU_data(shape=(batch * max_size, 100))
+    random_matrix = shared_GPU_data(shape=(batch_size, 100))
 
     ######################
     # Building the model #
@@ -64,7 +65,7 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
     # Symbolic variables
     x_gen = T.matrix('x_gen', dtype=theano.config.floatX)
     x = T.tensor4('x', dtype=theano.config.floatX)
-    index = T.lscalar()
+    # index = T.lscalar()
 
     # Creation of the model
     generator = build_generator(input_var=x_gen)
@@ -81,19 +82,17 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
     updates_dis = lasagne.updates.adam(loss_dis, params_dis, learning_rate=learning_rate_dis)
 
     # Creation of theano functions
-    train_dis = theano.function([index], loss_dis, updates=updates_dis, allow_input_downcast=True,
-                                givens={x: image[index * batch_size: (index + 1) * batch_size],
-                                        x_gen: random_matrix[index * batch_size: (index + 1) * batch_size]})
+    train_dis = theano.function([], loss_dis, updates=updates_dis, allow_input_downcast=True,
+                                givens={x: image, x_gen: random_matrix})
 
-    train_gen = theano.function([index], loss_gen, updates=updates_gen, allow_input_downcast=True,
-                                givens={x_gen: random_matrix[index * batch_size: (index + 1) * batch_size]})
+    train_gen = theano.function([], loss_gen, updates=updates_gen, allow_input_downcast=True,
+                                givens={x_gen: random_matrix})
 
-    valid_dis = theano.function([index], loss_dis, allow_input_downcast=True,
-                                givens={x: image[index * batch_size: (index + 1) * batch_size],
-                                        x_gen: random_matrix[index * batch_size: (index + 1) * batch_size]})
+    # valid_dis = theano.function([], loss_dis, allow_input_downcast=True,
+    #                            givens={x: image, x_gen: random_matrix})
 
-    valid_gen = theano.function([index], loss_gen, allow_input_downcast=True,
-                                givens={x_gen: random_matrix[index * batch_size: (index + 1) * batch_size]})
+    # valid_gen = theano.function([], loss_gen, allow_input_downcast=True,
+    #                            givens={x_gen: random_matrix})
 
     pred_batch = 5
     predict_image = theano.function([], output_gen, allow_input_downcast=True,
@@ -108,6 +107,8 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
     epoch = 0
     nb_train_dis = 25
     nb_train_gen = 10
+    nb_batch = 10000 // batch_size
+    nb_block = nb_batch // nb_train_dis
     start_time = timeit.default_timer()
 
     while (epoch < n_epochs):
@@ -122,22 +123,28 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
             input = assemble(input, target)
             # Shape = (10000, 100)
             sample = random_sample(size=(10000, 100))
-            image.set_value(input[0: batch * max_size])
-            random_matrix.set_value(sample[0: batch * max_size])
-            for j in range(nb_train_dis):
-                loss = train_dis(j)
-                loss_dis.append(loss)
-                if j <= nb_train_gen:
-                    loss = train_gen(j)
-                    loss_gen.append(loss)
-            image.set_value(input[batch * max_size:])
-            random_matrix.set_value(sample[batch * max_size:])
-            for j in range(nb_train_dis):
-                loss = train_dis(j)
-                loss_dis.append(loss)
-                if j <= nb_train_gen:
-                    loss = train_gen(j)
-                    loss_gen.append(loss)
+            for j in range(nb_block):
+                if j == 0:
+                    for index in range(nb_train_dis):
+                        image.set_value(input[index * batch_size: (index + 1) * batch_size])
+                        random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
+                        loss = train_dis()
+                        loss_dis.append(loss)
+                    for index in range(nb_train_gen):
+                        random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
+                        loss = train_gen()
+                        loss_gen.append(loss)
+
+                else:
+                    for index in range(nb_train_dis, nb_block):  # nb_block = 2*nb_train_dis
+                        image.set_value(input[index * batch_size: (index + 1) * batch_size])
+                        random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
+                        loss = train_dis()
+                        loss_dis.append(loss)
+                    for index in range(nb_train_dis, nb_train_dis + nb_train_gen):
+                        random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
+                        loss = train_gen()
+                        loss_gen.append(loss)
 
         # Plot the learning curve
         ax1 = host_subplot(111, axes_class=AA.Axes)
@@ -161,8 +168,6 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=1, 
 
         plt.savefig('Learning_curve_epoch' + str(epoch))
 
-
-        # if we got the best validation score until now
         if (epoch - 1) % 5 == 0:
             # save the model and a bunch of generated pictures
             print ('... saving model and generated images')
