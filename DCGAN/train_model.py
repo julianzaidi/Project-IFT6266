@@ -27,7 +27,7 @@ from utils import assemble
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=5, batch_size=100):
+def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=5, batch_size=50):
     '''
             Function that compute the training of the model
             '''
