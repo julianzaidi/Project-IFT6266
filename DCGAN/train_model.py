@@ -97,15 +97,15 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=5, 
     nb_train_gen = 1
     nb_batch = 10000 // batch_size
     nb_block = nb_batch // nb_train_dis
+    loss_dis = []
+    loss_gen = []
 
     start_time = timeit.default_timer()
 
     while (epoch < n_epochs):
         epoch = epoch + 1
-        loss_dis = []
-        loss_gen = []
         for i in range(nb_train_batch):
-            print (i)
+            #print (i)
             # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
             input, target = get_image(data_path, train_input_path, train_target_path, str(i))
             # Shape = (10000, 3, 64, 64)
@@ -113,40 +113,18 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=5, 
             # Shape = (10000, 100)
             sample = random_sample(size=(10000, 100))
             for j in range(nb_block):
-                print (j)
+                #print (j)
                 for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
-                    print (index)
+                    #print (index)
                     image.set_value(input[index * batch_size: (index + 1) * batch_size])
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_dis()
                     loss_dis.append(loss)
                 for index in range(nb_train_gen * j, nb_train_gen * (j + 1)):
-                    print (index)
+                    #print (index)
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_gen()
                     loss_gen.append(loss)
-
-        # Plot the learning curve
-        ax1 = host_subplot(111, axes_class=AA.Axes)
-        plt.subplots_adjust(right=0.75)
-        ax2 = ax1.twiny()
-
-        x1 = range(1, len(loss_dis) + 1)
-        ax1.set_xlim([x1[0], x1[-1]])
-        x2 = range(1, len(loss_gen) + 1)
-        ax2.set_xlim([x2[0], x2[-1]])
-
-        ax1.set_xlabel('training iteration (Discriminator)', color='g')
-        ax2.set_xlabel('training iteration (Generator)', color='b')
-        ax1.set_ylabel('Loss')
-
-        ax1.plot(x1, loss_dis, 'g', label='Discriminator loss')
-        ax2.plot(x2, loss_gen, 'b', label='Generator Loss')
-
-        ax1.grid(True)
-        ax1.legend()
-
-        plt.savefig('Learning_curve_epoch' + str(epoch))
 
         if epoch % 5 == 0:
             # save the model and a bunch of generated pictures
@@ -164,6 +142,29 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=5, 
             plt.savefig('generated_images_epoch' + str(epoch) + '.png', bbox_inches='tight')
 
     end_time = timeit.default_timer()
+
+    # Plot the learning curve
+    ax1 = host_subplot(111, axes_class=AA.Axes)
+    plt.subplots_adjust(right=0.75)
+    ax2 = ax1.twiny()
+
+    x1 = range(1, len(loss_dis) + 1)
+    ax1.set_xlim([x1[0], x1[-1]])
+    x2 = range(1, len(loss_gen) + 1)
+    ax2.set_xlim([x2[0], x2[-1]])
+
+    ax1.set_xlabel('training iteration (Discriminator)', color='g')
+    ax2.set_xlabel('training iteration (Generator)', color='b')
+    ax1.set_ylabel('Loss')
+
+    ax1.plot(x1, loss_dis, 'g', label='Discriminator loss')
+    ax2.plot(x2, loss_gen, 'b', label='Generator Loss')
+
+    ax1.grid(True)
+    ax1.legend()
+
+    plt.savefig('Learning_curve_epoch5')
+
     print('Optimization complete.')
     print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
 
