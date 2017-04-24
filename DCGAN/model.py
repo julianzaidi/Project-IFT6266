@@ -110,8 +110,7 @@ def build_generator(input_var=None, nfilters=[1024, 512, 256, 128, 3], filter_si
     return transconv_layer5.output
 
 
-def build_discriminator(input_var=None, nfilters=[128, 256, 512, 1024, 100], filter_size=[2, 2, 2, 2, 4],
-                        input_channels=3):
+def build_discriminator(input_var=None, nfilters=[128, 256, 512, 1024], filter_size=[2, 2, 2, 2], input_channels=3):
 
     ###############################
     # Build Network Configuration #
@@ -134,11 +133,8 @@ def build_discriminator(input_var=None, nfilters=[128, 256, 512, 1024, 100], fil
     # Conv layer : output.shape = (batch_size, 1024, 4, 4)
     conv_layer4 = ConvLayer(layers.batch_norm(conv_layer3.output), num_filters=nfilters[3], filter_size=filter_size[3])
 
-    # Conv layer : output.shape = (batch_size, 100, 1, 1)
-    conv_layer5 = ConvLayer(layers.batch_norm(conv_layer4.output), num_filters=nfilters[4], filter_size=filter_size[4])
-
     # Dense Layer : output.shape = (batch_size, 1)
-    dense_layer = DenseLayer(layers.FlattenLayer(layers.batch_norm(conv_layer5.output)), num_units=1,
+    dense_layer = DenseLayer(layers.FlattenLayer(layers.batch_norm(conv_layer4.output)), num_units=1,
                              activation=sigmoid)
 
     return layers.batch_norm(dense_layer.output)
