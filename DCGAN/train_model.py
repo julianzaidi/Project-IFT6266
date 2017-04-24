@@ -48,9 +48,9 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
     input_channel = 3
     max_height = 64
     max_width = 64
-    # Shape = (5000, 3, 64, 64)
+    # Shape = (100, 3, 64, 64)
     image = shared_GPU_data(shape=(batch_size, input_channel, max_height, max_width))
-    # Shape = (5000, 100)
+    # Shape = (100, 100)
     random_matrix = shared_GPU_data(shape=(batch_size, 100))
 
     ######################
@@ -93,11 +93,11 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
     print('... Training')
 
     epoch = 0
-    nb_train_dis = 1
+    nb_train_dis = 5
     nb_train_gen = 1
     nb_batch = 10000 // batch_size
-    #nb_block = nb_batch // nb_train_dis
-    nb_block = nb_batch // nb_train_gen
+    nb_block = nb_batch // nb_train_dis
+    #nb_block = nb_batch // nb_train_gen
     loss_dis = []
     loss_gen = []
 
