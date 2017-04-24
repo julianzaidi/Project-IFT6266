@@ -157,7 +157,6 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
     ax1.set_xlabel('training iteration (Discriminator)', color='g')
     ax2.set_xlabel('training iteration (Generator)', color='b')
     ax1.set_ylabel('Loss')
-    ax1.set_title('Balancing G/D = 5/1')
 
     ax1.plot(x1, loss_dis, 'g', label='Discriminator loss')
     ax2.plot(x2, loss_gen, 'b', label='Generator Loss')
