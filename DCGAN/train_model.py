@@ -27,7 +27,7 @@ from utils import assemble
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=5, batch_size=10):
+def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=5, batch_size=100):
     '''
             Function that compute the training of the model
             '''
@@ -72,8 +72,8 @@ def train_model(learning_rate_dis=0.0009, learning_rate_gen=0.0005, n_epochs=5, 
     loss_gen = -T.mean(T.log(model_dis))
     loss_dis = -T.mean(T.log(real_dis) + T.log(1 - model_dis))
 
-    updates_gen = lasagne.updates.adam(loss_gen, params_gen, learning_rate=learning_rate_gen, beta1=0.5)
-    updates_dis = lasagne.updates.adam(loss_dis, params_dis, learning_rate=learning_rate_dis, beta1=0.5)
+    updates_gen = lasagne.updates.adam(loss_gen, params_gen, learning_rate=learning_rate_gen)#, beta1=0.5)
+    updates_dis = lasagne.updates.adam(loss_dis, params_dis, learning_rate=learning_rate_dis)#, beta1=0.5)
 
     # Creation of theano functions
     train_dis = theano.function([], loss_dis, updates=updates_dis, allow_input_downcast=True,
