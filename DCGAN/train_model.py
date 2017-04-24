@@ -116,7 +116,7 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, 
             for j in range(nb_block):
                 #print (j)
                 for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
-                    #print (index)
+                    print (index)
                     image.set_value(input[index * batch_size: (index + 1) * batch_size])
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_dis()
