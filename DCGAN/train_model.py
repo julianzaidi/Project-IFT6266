@@ -104,8 +104,8 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, 
     print('... Training')
 
     epoch = 0
-    nb_train_dis = 10
-    nb_train_gen = 1
+    nb_train_dis = 30
+    nb_train_gen = 10
     nb_batch = 10000 // batch_size
     nb_block = nb_batch // nb_train_dis
     # nb_block = nb_batch // nb_train_gen
@@ -138,6 +138,11 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, 
                     loss = train_gen()
                     loss_gen.append(loss)
 
+
+        sample = random_sample(size=(pred_batch, 100))
+        small_random_matrix.set_value(sample)
+        generated_images = predict_image()
+
         for k in range(pred_batch):
             plt.subplot(1, pred_batch, (k + 1))
             plt.axis('off')
@@ -153,10 +158,6 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, 
             np.savez('generator_epoch' + str(epoch) + '.npz', *layers.get_all_param_values(generator))
             np.save('loss_dis', loss_dis)
             np.save('loss_gen', loss_gen)
-
-            sample = random_sample(size=(pred_batch, 100))
-            small_random_matrix.set_value(sample)
-            generated_images = predict_image()
 
     end_time = timeit.default_timer()
 
