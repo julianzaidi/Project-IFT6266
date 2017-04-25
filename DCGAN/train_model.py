@@ -16,18 +16,27 @@ from model import build_generator
 from model import build_discriminator
 
 sys.path.insert(0, '/home2/ift6ed67/Project-IFT6266/CNN_Autoencoder')
-from utils import rolling_average
 from utils import shared_GPU_data
 from utils import random_sample
 from utils import get_path
 from utils import get_image
 from utils import assemble
 
-
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, batch_size=100):
+def rolling_average(list, max_iter=100):
+    y = []
+    for i in range(len(list)):
+        if i < max_iter:
+            y.append(np.mean(list[:i + 1]))
+        else:
+            y.append(np.mean(list[i - max_iter:i + 1]))
+
+    return y
+
+
+def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, batch_size=100):
     '''
             Function that compute the training of the model
             '''
@@ -85,7 +94,6 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
     train_gen = theano.function([], loss_gen, updates=updates_gen, allow_input_downcast=True,
                                 givens={x_gen: random_matrix})
 
-
     predict_image = theano.function([], output_gen, allow_input_downcast=True,
                                     givens={x_gen: small_random_matrix})
 
@@ -96,11 +104,11 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
     print('... Training')
 
     epoch = 0
-    nb_train_dis = 15
-    nb_train_gen = 5
+    nb_train_dis = 30
+    nb_train_gen = 20
     nb_batch = 10000 // batch_size
     nb_block = nb_batch // nb_train_dis
-    #nb_block = nb_batch // nb_train_gen
+    # nb_block = nb_batch // nb_train_gen
     loss_dis = []
     loss_gen = []
 
@@ -130,6 +138,13 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
                     loss = train_gen()
                     loss_gen.append(loss)
 
+        for k in range(pred_batch):
+            plt.subplot(1, pred_batch, (k + 1))
+            plt.axis('off')
+            plt.imshow(generated_images[k, :, :, :].transpose(1, 2, 0))
+
+        plt.savefig('generated_images_epoch' + str(epoch) + '.png', bbox_inches='tight')
+
         if epoch % 1 == 0:
             # save the model and a bunch of generated pictures
             print ('... saving model and generated images')
@@ -142,13 +157,6 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
             sample = random_sample(size=(pred_batch, 100))
             small_random_matrix.set_value(sample)
             generated_images = predict_image()
-
-            for i in range(pred_batch):
-                plt.subplot(1, pred_batch, (i + 1))
-                plt.axis('off')
-                plt.imshow(generated_images[i, :, :, :].transpose(1, 2, 0))
-
-            plt.savefig('generated_images_epoch' + str(epoch) + '.png', bbox_inches='tight')
 
     end_time = timeit.default_timer()
 

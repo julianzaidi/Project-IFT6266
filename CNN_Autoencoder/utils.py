@@ -4,7 +4,6 @@
 
 import theano
 import matplotlib
-
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
@@ -56,17 +55,6 @@ def random_sample(size=None, dtype=theano.config.floatX):
     sample = sample.astype(dtype)
 
     return sample
-
-
-def rolling_average(list, max_iter=100):
-    y = []
-    for i in range(len(list)):
-        if i < max_iter:
-            y.append(np.mean(list[:i + 1]))
-        else:
-            y.append(np.mean(list[i - max_iter:i + 1]))
-
-    return y
 
 
 def assemble(input, target):
