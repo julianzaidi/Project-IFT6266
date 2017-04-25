@@ -57,6 +57,17 @@ def random_sample(size=None, dtype=theano.config.floatX):
     return sample
 
 
+def rolling_average(list, max_iter=100):
+    y = []
+    for i in range(len(list)):
+        if i < max_iter:
+            y.append(np.mean(list[:i + 1]))
+        else:
+            y.append(np.mean(list[i - max_iter:i + 1]))
+
+    return y
+
+
 def assemble(input, target):
     '''
                 Assemble the input with the target
