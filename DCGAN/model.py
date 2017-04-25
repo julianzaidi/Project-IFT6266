@@ -73,7 +73,7 @@ class TransposedConvLayer(object):
                                                    nonlinearity=activation)
 
 
-def build_generator(input_var=None, nfilters=[1024, 512, 256, 128, 3], filter_size=[4, 2, 2, 2, 2]):
+def build_generator(input_var=None, nfilters=[512, 256, 128, 64, 3], filter_size=[4, 2, 2, 2, 2]):
 
     ###############################
     # Build Network Configuration #
@@ -87,19 +87,19 @@ def build_generator(input_var=None, nfilters=[1024, 512, 256, 128, 3], filter_si
     # Reshape layer : output.shape = (batch_size, 100, 1, 1)
     reshape_layer = layers.ReshapeLayer(input_layer.output, (input_var.shape[0], 100, 1, 1))
 
-    # Tranposed conv layer : output.shape = (batch_size, 1024, 4, 4)
+    # Tranposed conv layer : output.shape = (batch_size, 512, 4, 4)
     transconv_layer1 = TransposedConvLayer(layers.batch_norm(reshape_layer), num_filters=nfilters[0],
                                            filter_size=filter_size[0])
 
-    # Tranposed conv layer : output.shape = (batch_size, 512, 8, 8)
+    # Tranposed conv layer : output.shape = (batch_size, 256, 8, 8)
     transconv_layer2 = TransposedConvLayer(layers.batch_norm(transconv_layer1.output), num_filters=nfilters[1],
                                            filter_size=filter_size[1])
 
-    # Tranposed conv layer : output.shape = (batch_size, 256, 16, 16)
+    # Tranposed conv layer : output.shape = (batch_size, 128, 16, 16)
     transconv_layer3 = TransposedConvLayer(layers.batch_norm(transconv_layer2.output), num_filters=nfilters[2],
                                            filter_size=filter_size[2])
 
-    # Tranposed conv layer : output.shape = (batch_size, 128, 32, 32)
+    # Tranposed conv layer : output.shape = (batch_size, 64, 32, 32)
     transconv_layer4 = TransposedConvLayer(layers.batch_norm(transconv_layer3.output), num_filters=nfilters[3],
                                            filter_size=filter_size[3])
 
@@ -110,7 +110,7 @@ def build_generator(input_var=None, nfilters=[1024, 512, 256, 128, 3], filter_si
     return transconv_layer5.output
 
 
-def build_discriminator(input_var=None, nfilters=[128, 256, 512, 1024], filter_size=[2, 2, 2, 2], input_channels=3):
+def build_discriminator(input_var=None, nfilters=[64, 128, 256, 512], filter_size=[2, 2, 2, 2], input_channels=3):
 
     ###############################
     # Build Network Configuration #
@@ -121,16 +121,16 @@ def build_discriminator(input_var=None, nfilters=[128, 256, 512, 1024], filter_s
     # Input of the network : shape = (batch_size, 3, 64, 64)
     input_layer = InputLayer(shape=(None, input_channels, 64, 64), input_var=input_var)
 
-    # Conv layer : output.shape = (batch_size, 128, 32, 32)
+    # Conv layer : output.shape = (batch_size, 64, 32, 32)
     conv_layer1 = ConvLayer(input_layer.output, num_filters=nfilters[0], filter_size=filter_size[0])
 
-    # Conv layer : output.shape = (batch_size, 256, 16, 16)
+    # Conv layer : output.shape = (batch_size, 128, 16, 16)
     conv_layer2 = ConvLayer(layers.batch_norm(conv_layer1.output), num_filters=nfilters[1], filter_size=filter_size[1])
 
-    # Conv layer : output.shape = (batch_size, 512, 8, 8)
+    # Conv layer : output.shape = (batch_size, 256, 8, 8)
     conv_layer3 = ConvLayer(layers.batch_norm(conv_layer2.output), num_filters=nfilters[2], filter_size=filter_size[2])
 
-    # Conv layer : output.shape = (batch_size, 1024, 4, 4)
+    # Conv layer : output.shape = (batch_size, 512, 4, 4)
     conv_layer4 = ConvLayer(layers.batch_norm(conv_layer3.output), num_filters=nfilters[3], filter_size=filter_size[3])
 
     # Dense Layer : output.shape = (batch_size, 1)
