@@ -26,7 +26,7 @@ from utils import assemble
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=25, batch_size=100):
+def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, batch_size=100):
     '''
             Function that compute the training of the model
             '''
@@ -47,10 +47,13 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=25,
     input_channel = 3
     max_height = 64
     max_width = 64
+    pred_batch = 5
     # Shape = (100, 3, 64, 64)
     image = shared_GPU_data(shape=(batch_size, input_channel, max_height, max_width))
     # Shape = (100, 100)
     random_matrix = shared_GPU_data(shape=(batch_size, 100))
+    # Shape = (5, 100)
+    small_random_matrix = shared_GPU_data(shape=(pred_batch, 100))
 
     ######################
     # Building the model #
@@ -81,9 +84,9 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=25,
     train_gen = theano.function([], loss_gen, updates=updates_gen, allow_input_downcast=True,
                                 givens={x_gen: random_matrix})
 
-    pred_batch = 5
+
     predict_image = theano.function([], output_gen, allow_input_downcast=True,
-                                    givens={x_gen: random_sample(size=(pred_batch, 100))})
+                                    givens={x_gen: small_random_matrix})
 
     ###################
     # Train the model #
@@ -92,8 +95,8 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=25,
     print('... Training')
 
     epoch = 0
-    nb_train_dis = 10
-    nb_train_gen = 5
+    nb_train_dis = 5
+    nb_train_gen = 3
     nb_batch = 10000 // batch_size
     nb_block = nb_batch // nb_train_dis
     #nb_block = nb_batch // nb_train_gen
@@ -105,7 +108,7 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=25,
     while (epoch < n_epochs):
         epoch = epoch + 1
         for i in range(nb_train_batch):
-            #print (i)
+            print (i)
             # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
             input, target = get_image(data_path, train_input_path, train_target_path, str(i))
             # Shape = (10000, 3, 64, 64)
@@ -115,23 +118,28 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=25,
             for j in range(nb_block):
                 #print (j)
                 for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
-                    print (index)
+                    #print (index)
                     image.set_value(input[index * batch_size: (index + 1) * batch_size])
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_dis()
                     loss_dis.append(loss)
                 for index in range(nb_train_gen * j, nb_train_gen * (j + 1)):
-                    print (index)
+                    #print (index)
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_gen()
                     loss_gen.append(loss)
 
-        if epoch % 5 == 0:
+        if epoch % 1 == 0:
             # save the model and a bunch of generated pictures
             print ('... saving model and generated images')
 
             np.savez('discriminator_epoch' + str(epoch) + '.npz', *layers.get_all_param_values(discriminator))
             np.savez('generator_epoch' + str(epoch) + '.npz', *layers.get_all_param_values(generator))
+            np.save('loss_dis_epoch' + str(epoch), loss_dis)
+            np.save('loss_gen_epoch' + str(epoch), loss_gen)
+
+            sample = random_sample(size=(pred_batch, 100))
+            small_random_matrix.set_value(sample)
             generated_images = predict_image()
 
             for i in range(pred_batch):
