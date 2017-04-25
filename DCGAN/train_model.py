@@ -16,6 +16,7 @@ from model import build_generator
 from model import build_discriminator
 
 sys.path.insert(0, '/home2/ift6ed67/Project-IFT6266/CNN_Autoencoder')
+from utils import rolling_average
 from utils import shared_GPU_data
 from utils import random_sample
 from utils import get_path
@@ -95,8 +96,8 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
     print('... Training')
 
     epoch = 0
-    nb_train_dis = 15
-    nb_train_gen = 5
+    nb_train_dis = 20
+    nb_train_gen = 10
     nb_batch = 10000 // batch_size
     nb_block = nb_batch // nb_train_dis
     #nb_block = nb_batch // nb_train_gen
@@ -135,8 +136,8 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
 
             np.savez('discriminator_epoch' + str(epoch) + '.npz', *layers.get_all_param_values(discriminator))
             np.savez('generator_epoch' + str(epoch) + '.npz', *layers.get_all_param_values(generator))
-            np.save('loss_dis_epoch' + str(epoch), loss_dis)
-            np.save('loss_gen_epoch' + str(epoch), loss_gen)
+            np.save('loss_dis', loss_dis)
+            np.save('loss_gen', loss_gen)
 
             sample = random_sample(size=(pred_batch, 100))
             small_random_matrix.set_value(sample)
@@ -165,13 +166,13 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
     ax2.set_xlabel('training iteration (Generator)', color='b')
     ax1.set_ylabel('Loss')
 
-    ax1.plot(x1, loss_dis, 'g', label='Discriminator loss')
-    ax2.plot(x2, loss_gen, 'b', label='Generator Loss')
+    ax1.plot(x1, rolling_average(loss_dis), 'g', label='Discriminator loss')
+    ax2.plot(x2, rolling_average(loss_gen), 'b', label='Generator Loss')
 
     ax1.grid(True)
     ax1.legend()
 
-    plt.savefig('Learning_curve_epoch5')
+    plt.savefig('Learning_curve_epoch')
 
     print('Optimization complete.')
     print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
