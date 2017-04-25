@@ -10,6 +10,8 @@ import numpy as np
 import _pickle as pkl
 # import PIL.Image as Image
 
+theano.config.floatX = 'float32'
+
 
 def save_obj(obj, name, extension='.pkl'):
     with open(name + extension, 'wb') as f:
@@ -47,16 +49,11 @@ def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
     return theano.shared(np.zeros(shape=shape, dtype=dtype), borrow=borrow)
 
 
-def random_sample(size=None, dtype="float32"):
+def random_sample(size=None, dtype=theano.config.floatX):
 
-    if type(dtype) == str:
-        dtype = np.dtype(dtype).type
+    sample = np.random.normal(size=size)
+    sample = sample.astype(dtype)
 
-    type_max = 1 << np.finfo(dtype).nmant
-    sample = np.empty(size, dtype=dtype)
-    sample[...] = np.random.randint(0, type_max, size=size) / dtype(type_max)
-    if size is None:
-        sample = sample[()]
     return sample
 
 
