@@ -4,10 +4,12 @@
 
 import theano
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import _pickle as pkl
+
 # import PIL.Image as Image
 
 theano.config.floatX = 'float32'
@@ -50,7 +52,6 @@ def shared_GPU_data(shape, dtype=theano.config.floatX, borrow=True):
 
 
 def random_sample(size=None, dtype=theano.config.floatX):
-
     sample = np.random.normal(size=size)
     sample = sample.astype(dtype)
 
