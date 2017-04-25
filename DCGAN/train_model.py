@@ -95,8 +95,8 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, 
     print('... Training')
 
     epoch = 0
-    nb_train_dis = 5
-    nb_train_gen = 3
+    nb_train_dis = 10
+    nb_train_gen = 5
     nb_batch = 10000 // batch_size
     nb_block = nb_batch // nb_train_dis
     #nb_block = nb_batch // nb_train_gen
@@ -116,7 +116,7 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, 
             # Shape = (10000, 100)
             sample = random_sample(size=(10000, 100))
             for j in range(nb_block):
-                #print (j)
+                print (j)
                 for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
                     #print (index)
                     image.set_value(input[index * batch_size: (index + 1) * batch_size])
