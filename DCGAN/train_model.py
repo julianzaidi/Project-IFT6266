@@ -36,7 +36,7 @@ def rolling_average(list, max_iter=100):
     return y
 
 
-def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, batch_size=100):
+def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, batch_size=100):
     '''
             Function that compute the training of the model
             '''
