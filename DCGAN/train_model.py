@@ -70,31 +70,37 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
     ######################
 
     # Symbolic variables
-    x_gen = T.matrix('x_gen', dtype=theano.config.floatX)
+    noise = T.matrix('noise', dtype=theano.config.floatX)
     x = T.tensor4('x', dtype=theano.config.floatX)
 
     # Creation of the model
-    generator = build_generator(input_var=x_gen)
-    params_gen = layers.get_all_params(generator, trainable=True)
-    output_gen = layers.get_output(generator, deterministic=True)
-    discriminator = build_discriminator(input_var=x)
-    params_dis = layers.get_all_params(discriminator, trainable=True)
-    model_dis = layers.get_output(discriminator, inputs=output_gen, deterministic=True)
-    real_dis = layers.get_output(discriminator, deterministic=True)
-    loss_gen = -T.mean(T.log(model_dis))
-    loss_dis = -T.mean(T.log(real_dis) + T.log(1 - model_dis))
+    generator = build_generator(input_var=None)
+    discriminator = build_discriminator(input_var=None)
 
-    updates_gen = lasagne.updates.adam(loss_gen, params_gen, learning_rate=learning_rate_gen, beta1=0.5)
+    fake_image = layers.get_output(generator, inputs=noise)
+    prob_real = layers.get_output(discriminator, inputs=x)
+    prob_fake = layers.get_output(discriminator, inputs=fake_image)
+
+    params_gen = layers.get_all_params(generator, trainable=True)
+    params_dis = layers.get_all_params(discriminator, trainable=True)
+
+    loss_real = -T.mean(T.log(prob_real))
+    loss_fake = -T.mean(T.log(1 - prob_fake))
+    loss_dis = loss_real + loss_fake
+
+    loss_gen = -T.mean(T.log(prob_fake))
+
     updates_dis = lasagne.updates.adam(loss_dis, params_dis, learning_rate=learning_rate_dis, beta1=0.5)
+    updates_gen = lasagne.updates.adam(loss_gen, params_gen, learning_rate=learning_rate_gen, beta1=0.5)
 
     # Creation of theano functions
     train_dis = theano.function([], loss_dis, updates=updates_dis, allow_input_downcast=True,
-                                givens={x: image, x_gen: random_matrix})
+                                givens={x: image, noise: random_matrix})
 
     train_gen = theano.function([], loss_gen, updates=updates_gen, allow_input_downcast=True,
-                                givens={x_gen: random_matrix})
+                                givens={noise: random_matrix})
 
-    predict_image = theano.function([], output_gen, allow_input_downcast=True, givens={x_gen: small_random_matrix})
+    predict_image = theano.function([], fake_image, allow_input_downcast=True, givens={noise: small_random_matrix})
 
     ###################
     # Train the model #
@@ -103,11 +109,11 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
     print('... Training')
 
     epoch = 0
-    nb_train_dis = 10
-    nb_train_gen = 20
+    nb_train_dis = 25
+    nb_train_gen = 10
     nb_batch = 10000 // batch_size
-    #nb_block = nb_batch // nb_train_dis
-    nb_block = nb_batch // nb_train_gen
+    nb_block = nb_batch // nb_train_dis
+    #nb_block = nb_batch // nb_train_gen
     loss_dis = []
     loss_gen = []
 
@@ -140,7 +146,7 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
                     loss_gen.append(loss)
 
 
-        if epoch % 1 == 0:
+        if epoch % 2 == 0:
             # save the model and a bunch of generated pictures
             print ('... saving model and generated images')
 

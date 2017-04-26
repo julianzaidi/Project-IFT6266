@@ -4,76 +4,10 @@
 
 import lasagne
 import lasagne.layers as layers
-#from lasagne.nonlinearities import tanh
-from lasagne.nonlinearities import rectify
-from lasagne.nonlinearities import sigmoid
-from lasagne.nonlinearities import LeakyRectify
+from lasagne import nonlinearities
 
 
-#########################
-# Layers implementation #
-#########################
-
-def initialize_parameters():
-    W = lasagne.init.Normal(std=0.02)
-    b = lasagne.init.Constant(0.)
-
-    return [W, b]
-
-
-class InputLayer(object):
-    def __init__(self, shape, input_var=None):
-        """
-                Input of the Network
-
-                """
-
-        self.output = layers.InputLayer(shape, input_var=input_var)
-
-
-class DenseLayer(object):
-    def __init__(self, input, num_units, activation=rectify):
-        """
-                Typical hidden layer of a MLP: units are fully-connected
-
-                NOTE : The non linearity used here is relu
-
-                """
-
-        self.input = input
-        self.output = layers.DenseLayer(self.input, num_units, W=initialize_parameters()[0],
-                                        b=initialize_parameters()[1],
-                                        nonlinearity=activation)
-
-
-class ConvLayer(object):
-    def __init__(self, input, num_filters, filter_size, stride=(2, 2), pad=(0, 0),
-                 activation=LeakyRectify(leakiness=0.2)):
-        """
-                Allocate a ConvLayer with shared variable internal parameters
-
-                """
-
-        self.input = input
-        self.output = layers.Conv2DLayer(self.input, num_filters, filter_size, stride=stride, pad=pad,
-                                         W=initialize_parameters()[0], b=initialize_parameters()[1],
-                                         nonlinearity=activation)
-
-
-class TransposedConvLayer(object):
-    def __init__(self, input, num_filters, filter_size, stride=(2, 2), padding=(0, 0), activation=rectify):
-        """
-                Allocate a TransposedConvLayer with shared variable internal parameters.
-
-                """
-
-        self.input = input
-        self.output = layers.TransposedConv2DLayer(self.input, num_filters, filter_size, stride=stride, crop=padding,
-                                                   W=initialize_parameters()[0], b=initialize_parameters()[1],
-                                                   nonlinearity=activation)
-
-
-def build_generator(input_var=None, nfilters=[512, 256, 128, 64, 3], filter_size=[4, 2, 2, 2, 2]):
+def build_generator(input_var=None, noise_size=100, nfilters=[512, 256, 128, 64, 3]):
 
     ###############################
     # Build Network Configuration #
@@ -82,34 +16,35 @@ def build_generator(input_var=None, nfilters=[512, 256, 128, 64, 3], filter_size
     print ('... Building the generator')
 
     # Input of the network : shape = (batch_size, 100)
-    input_layer = InputLayer(shape=(None, 100), input_var=input_var)
+    network = layers.InputLayer(shape=(None, noise_size), input_var=input_var)
 
-    # Reshape layer : output.shape = (batch_size, 100, 1, 1)
-    reshape_layer = layers.ReshapeLayer(input_layer.output, (input_var.shape[0], 100, 1, 1))
+    # Reshape layer : shape = (batch_size, 100, 1, 1)
+    network = layers.ReshapeLayer(network, (-1, noise_size, 1, 1))
 
-    # Tranposed conv layer : output.shape = (batch_size, 512, 4, 4)
-    transconv_layer1 = TransposedConvLayer(reshape_layer, num_filters=nfilters[0], filter_size=filter_size[0])
+    # Tranposed conv layer : shape = (batch_size, 512, 4, 4)
+    network = layers.batch_norm(layers.TransposedConv2DLayer(network, num_filters=nfilters[0], filter_size=(4, 4),
+                                                             stride=(1, 1)))
 
-    # Tranposed conv layer : output.shape = (batch_size, 256, 8, 8)
-    transconv_layer2 = TransposedConvLayer(layers.batch_norm(transconv_layer1.output), num_filters=nfilters[1],
-                                           filter_size=filter_size[1])
+    # Tranposed conv layer : shape = (batch_size, 256, 8, 8)
+    network = layers.batch_norm(layers.TransposedConv2DLayer(network, num_filters=nfilters[1], filter_size=(5, 5),
+                                                             stride=(2, 2), crop=2, output_size=8))
 
-    # Tranposed conv layer : output.shape = (batch_size, 128, 16, 16)
-    transconv_layer3 = TransposedConvLayer(layers.batch_norm(transconv_layer2.output), num_filters=nfilters[2],
-                                           filter_size=filter_size[2])
+    # Tranposed conv layer : shape = (batch_size, 128, 16, 16)
+    network = layers.batch_norm(layers.TransposedConv2DLayer(network, num_filters=nfilters[2], filter_size=(5, 5),
+                                                             stride=(2, 2), crop=2, output_size=16))
 
-    # Tranposed conv layer : output.shape = (batch_size, 64, 32, 32)
-    transconv_layer4 = TransposedConvLayer(layers.batch_norm(transconv_layer3.output), num_filters=nfilters[3],
-                                           filter_size=filter_size[3])
+    # Tranposed conv layer : shape = (batch_size, 64, 32, 32)
+    network = layers.batch_norm(layers.TransposedConv2DLayer(network, num_filters=nfilters[3], filter_size=(5, 5),
+                                                             stride=(2, 2), crop=2, output_size=32))
 
-    # Tranposed conv layer : output.shape = (batch_size, 3, 64, 64)
-    transconv_layer5 = TransposedConvLayer(layers.batch_norm(transconv_layer4.output), num_filters=nfilters[4],
-                                           filter_size=filter_size[4])#, activation=sigmoid)
+    # Tranposed conv layer : shape = (batch_size, 3, 64, 64)
+    network = layers.TransposedConv2DLayer(network, num_filters=nfilters[4], filter_size=5, stride=2, crop=2,
+                                           output_size=64, nonlinearity=nonlinearities.sigmoid)
 
-    return transconv_layer5.output
+    return network
 
 
-def build_discriminator(input_var=None, nfilters=[64, 128, 256, 512], filter_size=[2, 2, 2, 2], input_channels=3):
+def build_discriminator(input_var=None, nfilters=[64, 128, 256, 512], input_channels=3):
 
     ###############################
     # Build Network Configuration #
@@ -117,23 +52,31 @@ def build_discriminator(input_var=None, nfilters=[64, 128, 256, 512], filter_siz
 
     print ('... Building the discriminator')
 
+    leaky = nonlinearities.LeakyRectify(0.2)
+
     # Input of the network : shape = (batch_size, 3, 64, 64)
-    input_layer = InputLayer(shape=(None, input_channels, 64, 64), input_var=input_var)
+    network = layers.InputLayer(shape=(None, input_channels, 64, 64), input_var=input_var)
 
-    # Conv layer : output.shape = (batch_size, 64, 32, 32)
-    conv_layer1 = ConvLayer(input_layer.output, num_filters=nfilters[0], filter_size=filter_size[0])
+    # Conv layer : shape = (batch_size, 64, 32, 32)
+    network = layers.Conv2DLayer(network, num_filters=nfilters[0], filter_size=(5, 5), stride=2, pad=2,
+                                 nonlinearity=leaky)
 
-    # Conv layer : output.shape = (batch_size, 128, 16, 16)
-    conv_layer2 = ConvLayer(conv_layer1.output, num_filters=nfilters[1], filter_size=filter_size[1])
+    # Conv layer : shape = (batch_size, 128, 16, 16)
+    network = layers.batch_norm(lasagne.layers.Conv2DLayer(network, num_filters=nfilters[1], filter_size=(5, 5),
+                                                           stride=2, pad=2, nonlinearity=leaky))
 
-    # Conv layer : output.shape = (batch_size, 256, 8, 8)
-    conv_layer3 = ConvLayer(layers.batch_norm(conv_layer2.output), num_filters=nfilters[2], filter_size=filter_size[2])
+    # Conv layer : shape = (batch_size, 256, 8, 8)
+    network = layers.batch_norm(lasagne.layers.Conv2DLayer(network, num_filters=nfilters[2], filter_size=(5, 5),
+                                                           stride=2, pad=2, nonlinearity=leaky))
 
-    # Conv layer : output.shape = (batch_size, 512, 4, 4)
-    conv_layer4 = ConvLayer(layers.batch_norm(conv_layer3.output), num_filters=nfilters[3], filter_size=filter_size[3])
+    # Conv layer : shape = (batch_size, 512, 4, 4)
+    network = layers.batch_norm(lasagne.layers.Conv2DLayer(network, num_filters=nfilters[3], filter_size=(5, 5),
+                                                           stride=2, pad=2, nonlinearity=leaky))
 
-    # Dense Layer : output.shape = (batch_size, 1)
-    dense_layer = DenseLayer(layers.FlattenLayer(layers.batch_norm(conv_layer4.output)), num_units=1,
-                             activation=sigmoid)
+    # Flatten layer :shape = (batch_size, 8192)
+    network = lasagne.layers.FlattenLayer(network)
 
-    return dense_layer.output
+    # Dense layer :shape = (batch_size, 1)
+    network = lasagne.layers.DenseLayer(network, 1, nonlinearity=lasagne.nonlinearities.sigmoid)
+
+    return network
