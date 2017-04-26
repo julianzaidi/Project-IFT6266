@@ -1,5 +1,5 @@
 import sys
-#import timeit
+import timeit
 import theano
 import lasagne
 import numpy as np
@@ -78,6 +78,7 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, 
     discriminator = build_discriminator(input_var=None)
 
     fake_image = layers.get_output(generator, inputs=noise)
+    fake_image_det = layers.get_output(generator, inputs=noise, deterministic=True)
     prob_real = layers.get_output(discriminator, inputs=x)
     prob_fake = layers.get_output(discriminator, inputs=fake_image)
 
@@ -100,7 +101,7 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, 
     train_gen = theano.function([], loss_gen, updates=updates_gen, allow_input_downcast=True,
                                 givens={noise: random_matrix})
 
-    predict_image = theano.function([], fake_image, allow_input_downcast=True, givens={noise: small_random_matrix})
+    predict_image = theano.function([], fake_image_det, allow_input_downcast=True, givens={noise: small_random_matrix})
 
     ###################
     # Train the model #
@@ -109,15 +110,15 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, 
     print('... Training')
 
     epoch = 0
-    nb_train_dis = 25
-    nb_train_gen = 10
+    nb_train_dis = 10
+    nb_train_gen = 1
     nb_batch = 10000 // batch_size
     nb_block = nb_batch // nb_train_dis
     #nb_block = nb_batch // nb_train_gen
     loss_dis = []
     loss_gen = []
 
-    #start_time = timeit.default_timer()
+    start_time = timeit.default_timer()
 
     while (epoch < n_epochs):
         epoch = epoch + 1
@@ -132,15 +133,15 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, 
             sample = random_sample(size=(10000, 100))
             #print (sample.shape)
             for j in range(nb_block):
-                print (j)
+                #print (j)
                 for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
-                    print (index)
+                    #print (index)
                     image.set_value(assemblage[index * batch_size: (index + 1) * batch_size])
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_dis()
                     loss_dis.append(loss)
                 for index in range(nb_train_gen * j, nb_train_gen * (j + 1)):
-                    print (index)
+                    #print (index)
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_gen()
                     loss_gen.append(loss)
@@ -167,7 +168,7 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, 
 
             plt.savefig('generated_images_epoch' + str(epoch) + '.png', bbox_inches='tight')
 
-    #end_time = timeit.default_timer()
+    end_time = timeit.default_timer()
 
     # Plot the learning curve
     ax1 = host_subplot(111, axes_class=AA.Axes)
@@ -192,7 +193,7 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, 
     plt.savefig('Learning_curve')
 
     print('Optimization complete.')
-    #print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
+    print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
 
 
 if __name__ == '__main__':
