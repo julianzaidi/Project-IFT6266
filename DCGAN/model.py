@@ -104,7 +104,7 @@ def build_generator(input_var=None, nfilters=[512, 256, 128, 64, 3], filter_size
 
     # Tranposed conv layer : output.shape = (batch_size, 3, 64, 64)
     transconv_layer5 = TransposedConvLayer(layers.batch_norm(transconv_layer4.output), num_filters=nfilters[4],
-                                           filter_size=filter_size[4], activation=sigmoid)
+                                           filter_size=filter_size[4])#, activation=sigmoid)
 
     return transconv_layer5.output
 
