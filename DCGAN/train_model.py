@@ -36,7 +36,7 @@ def rolling_average(list, max_iter=100):
     return y
 
 
-def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, batch_size=100):
+def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, batch_size=100):
     '''
             Function that compute the training of the model
             '''
@@ -127,26 +127,26 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
             input, target = get_image(data_path, train_input_path, train_target_path, str(i))
             # Shape = (10000, 3, 64, 64)
             assemblage = assemble(input, target)
-            print (assemblage.shape)
+            #print (assemblage.shape)
             # Shape = (10000, 100)
             sample = random_sample(size=(10000, 100))
-            print (sample.shape)
+            #print (sample.shape)
             for j in range(nb_block):
-                #print (j)
+                print (j)
                 for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
-                    #print (index)
+                    print (index)
                     image.set_value(assemblage[index * batch_size: (index + 1) * batch_size])
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_dis()
                     loss_dis.append(loss)
                 for index in range(nb_train_gen * j, nb_train_gen * (j + 1)):
-                    #print (index)
+                    print (index)
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_gen()
                     loss_gen.append(loss)
 
 
-        if epoch % 2 == 0:
+        if epoch % 1 == 0:
             # save the model and a bunch of generated pictures
             print ('... saving model and generated images')
 
