@@ -4,7 +4,7 @@
 
 import lasagne
 import lasagne.layers as layers
-from lasagne.nonlinearities import tanh
+#from lasagne.nonlinearities import tanh
 from lasagne.nonlinearities import rectify
 from lasagne.nonlinearities import sigmoid
 from lasagne.nonlinearities import LeakyRectify
@@ -88,8 +88,7 @@ def build_generator(input_var=None, nfilters=[512, 256, 128, 64, 3], filter_size
     reshape_layer = layers.ReshapeLayer(input_layer.output, (input_var.shape[0], 100, 1, 1))
 
     # Tranposed conv layer : output.shape = (batch_size, 512, 4, 4)
-    transconv_layer1 = TransposedConvLayer(layers.batch_norm(reshape_layer), num_filters=nfilters[0],
-                                           filter_size=filter_size[0])
+    transconv_layer1 = TransposedConvLayer(reshape_layer, num_filters=nfilters[0], filter_size=filter_size[0])
 
     # Tranposed conv layer : output.shape = (batch_size, 256, 8, 8)
     transconv_layer2 = TransposedConvLayer(layers.batch_norm(transconv_layer1.output), num_filters=nfilters[1],
@@ -125,7 +124,7 @@ def build_discriminator(input_var=None, nfilters=[64, 128, 256, 512], filter_siz
     conv_layer1 = ConvLayer(input_layer.output, num_filters=nfilters[0], filter_size=filter_size[0])
 
     # Conv layer : output.shape = (batch_size, 128, 16, 16)
-    conv_layer2 = ConvLayer(layers.batch_norm(conv_layer1.output), num_filters=nfilters[1], filter_size=filter_size[1])
+    conv_layer2 = ConvLayer(conv_layer1.output, num_filters=nfilters[1], filter_size=filter_size[1])
 
     # Conv layer : output.shape = (batch_size, 256, 8, 8)
     conv_layer3 = ConvLayer(layers.batch_norm(conv_layer2.output), num_filters=nfilters[2], filter_size=filter_size[2])
@@ -137,4 +136,4 @@ def build_discriminator(input_var=None, nfilters=[64, 128, 256, 512], filter_siz
     dense_layer = DenseLayer(layers.FlattenLayer(layers.batch_norm(conv_layer4.output)), num_units=1,
                              activation=sigmoid)
 
-    return layers.batch_norm(dense_layer.output)
+    return dense_layer.output
