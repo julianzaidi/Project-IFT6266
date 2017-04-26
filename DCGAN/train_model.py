@@ -1,5 +1,5 @@
 import sys
-import timeit
+#import timeit
 import theano
 import lasagne
 import numpy as np
@@ -36,7 +36,7 @@ def rolling_average(list, max_iter=100):
     return y
 
 
-def train_model(learning_rate_dis=0.0004, learning_rate_gen=0.0004, n_epochs=2, batch_size=100):
+def train_model(learning_rate_dis=0.0004, learning_rate_gen=0.0004, n_epochs=40, batch_size=100):
     '''
             Function that compute the training of the model
             '''
@@ -94,8 +94,7 @@ def train_model(learning_rate_dis=0.0004, learning_rate_gen=0.0004, n_epochs=2, 
     train_gen = theano.function([], loss_gen, updates=updates_gen, allow_input_downcast=True,
                                 givens={x_gen: random_matrix})
 
-    predict_image = theano.function([], output_gen, allow_input_downcast=True,
-                                    givens={x_gen: small_random_matrix})
+    predict_image = theano.function([], output_gen, allow_input_downcast=True, givens={x_gen: small_random_matrix})
 
     ###################
     # Train the model #
@@ -108,16 +107,15 @@ def train_model(learning_rate_dis=0.0004, learning_rate_gen=0.0004, n_epochs=2, 
     nb_train_gen = 10
     nb_batch = 10000 // batch_size
     nb_block = nb_batch // nb_train_dis
-    # nb_block = nb_batch // nb_train_gen
     loss_dis = []
     loss_gen = []
 
-    start_time = timeit.default_timer()
+    #start_time = timeit.default_timer()
 
     while (epoch < n_epochs):
         epoch = epoch + 1
         for i in range(nb_train_batch):
-            print (i)
+            #print (i)
             # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
             input, target = get_image(data_path, train_input_path, train_target_path, str(i))
             # Shape = (10000, 3, 64, 64)
@@ -125,7 +123,7 @@ def train_model(learning_rate_dis=0.0004, learning_rate_gen=0.0004, n_epochs=2, 
             # Shape = (10000, 100)
             sample = random_sample(size=(10000, 100))
             for j in range(nb_block):
-                print (j)
+                #print (j)
                 for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
                     #print (index)
                     image.set_value(input[index * batch_size: (index + 1) * batch_size])
@@ -159,7 +157,7 @@ def train_model(learning_rate_dis=0.0004, learning_rate_gen=0.0004, n_epochs=2, 
 
             plt.savefig('generated_images_epoch' + str(epoch) + '.png', bbox_inches='tight')
 
-    end_time = timeit.default_timer()
+    #end_time = timeit.default_timer()
 
     # Plot the learning curve
     ax1 = host_subplot(111, axes_class=AA.Axes)
@@ -181,10 +179,10 @@ def train_model(learning_rate_dis=0.0004, learning_rate_gen=0.0004, n_epochs=2, 
     ax1.grid(True)
     ax1.legend()
 
-    plt.savefig('Learning_curve_epoch')
+    plt.savefig('Learning_curve')
 
     print('Optimization complete.')
-    print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
+    #print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
 
 
 if __name__ == '__main__':
