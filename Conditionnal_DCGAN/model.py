@@ -4,7 +4,7 @@
 
 import lasagne
 import lasagne.layers as layers
-from lasagne.nonlinearities import tanh
+#from lasagne.nonlinearities import tanh
 from lasagne.nonlinearities import rectify
 from lasagne.nonlinearities import sigmoid
 from lasagne.nonlinearities import LeakyRectify
@@ -89,7 +89,7 @@ def build_context_encoder(input_var=None, nfilters=[64, 128, 256, 512, 4000, 512
     conv_layer1 = ConvLayer(input_layer.output, num_filters=nfilters[0], filter_size=filter_size[0])
 
     # Conv layer : output.shape = (batch_size, 128, 16, 16)
-    conv_layer2 = ConvLayer(layers.batch_norm(conv_layer1.output), num_filters=nfilters[1], filter_size=filter_size[1])
+    conv_layer2 = ConvLayer(conv_layer1.output, num_filters=nfilters[1], filter_size=filter_size[1])
 
     # Conv layer : output.shape = (batch_size, 256, 8, 8)
     conv_layer3 = ConvLayer(layers.batch_norm(conv_layer2.output), num_filters=nfilters[2], filter_size=filter_size[2])
@@ -101,8 +101,7 @@ def build_context_encoder(input_var=None, nfilters=[64, 128, 256, 512, 4000, 512
     conv_layer5 = ConvLayer(layers.batch_norm(conv_layer4.output), num_filters=nfilters[4], filter_size=filter_size[4])
 
     # Tranposed conv layer : output.shape = (batch_size, 512, 4, 4)
-    transconv_layer1 = TransposedConvLayer(layers.batch_norm(conv_layer5.output), num_filters=nfilters[5],
-                                           filter_size=filter_size[5])
+    transconv_layer1 = TransposedConvLayer(conv_layer5.output, num_filters=nfilters[5], filter_size=filter_size[5])
 
     # Tranposed conv layer : output.shape = (batch_size, 256, 8, 8)
     transconv_layer2 = TransposedConvLayer(layers.batch_norm(transconv_layer1.output), num_filters=nfilters[6],
@@ -114,7 +113,7 @@ def build_context_encoder(input_var=None, nfilters=[64, 128, 256, 512, 4000, 512
 
     # Tranposed conv layer : output.shape = (batch_size, 3, 32, 32)
     transconv_layer4 = TransposedConvLayer(layers.batch_norm(transconv_layer3.output), num_filters=nfilters[8],
-                                           filter_size=filter_size[8], activation=tanh)
+                                           filter_size=filter_size[8], activation=sigmoid)
 
     return transconv_layer4.output
 
@@ -134,7 +133,7 @@ def build_discriminator(input_var=None, nfilters=[128, 256, 512], filter_size=[2
     conv_layer1 = ConvLayer(input_layer.output, num_filters=nfilters[0], filter_size=filter_size[0])
 
     # Conv layer : output.shape = (batch_size, 256, 8, 8)
-    conv_layer2 = ConvLayer(layers.batch_norm(conv_layer1.output), num_filters=nfilters[1], filter_size=filter_size[1])
+    conv_layer2 = ConvLayer(conv_layer1.output, num_filters=nfilters[1], filter_size=filter_size[1])
 
     # Conv layer : output.shape = (batch_size, 512, 4, 4)
     conv_layer3 = ConvLayer(layers.batch_norm(conv_layer2.output), num_filters=nfilters[2], filter_size=filter_size[2])
@@ -143,4 +142,4 @@ def build_discriminator(input_var=None, nfilters=[128, 256, 512], filter_size=[2
     dense_layer = DenseLayer(layers.FlattenLayer(layers.batch_norm(conv_layer3.output)), num_units=1,
                              activation=sigmoid)
 
-    return layers.batch_norm(dense_layer.output)
+    return dense_layer.output
