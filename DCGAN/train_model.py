@@ -36,7 +36,7 @@ def rolling_average(list, max_iter=100):
     return y
 
 
-def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=5, batch_size=100):
+def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=1, batch_size=100):
     '''
             Function that compute the training of the model
             '''
@@ -103,11 +103,11 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=5, 
     print('... Training')
 
     epoch = 0
-    nb_train_dis = 10
-    nb_train_gen = 20
+    nb_train_dis = 30
+    nb_train_gen = 10
     nb_batch = 10000 // batch_size
-    #nb_block = nb_batch // nb_train_dis
-    nb_block = nb_batch // nb_train_gen
+    nb_block = nb_batch // nb_train_dis
+    #nb_block = nb_batch // nb_train_gen
     loss_dis = []
     loss_gen = []
 
@@ -120,14 +120,16 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=5, 
             # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
             input, target = get_image(data_path, train_input_path, train_target_path, str(i))
             # Shape = (10000, 3, 64, 64)
-            input = assemble(input, target)
+            assemblage = assemble(input, target)
+            print (assemblage.shape)
             # Shape = (10000, 100)
             sample = random_sample(size=(10000, 100))
+            print (sample.shape)
             for j in range(nb_block):
                 #print (j)
                 for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
                     #print (index)
-                    image.set_value(input[index * batch_size: (index + 1) * batch_size])
+                    image.set_value(assemblage[index * batch_size: (index + 1) * batch_size])
                     random_matrix.set_value(sample[index * batch_size: (index + 1) * batch_size])
                     loss = train_dis()
                     loss_dis.append(loss)
@@ -138,7 +140,7 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=5, 
                     loss_gen.append(loss)
 
 
-        if epoch % 5 == 0:
+        if epoch % 1 == 0:
             # save the model and a bunch of generated pictures
             print ('... saving model and generated images')
 
@@ -150,6 +152,7 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=5, 
             sample = random_sample(size=(pred_batch, 100))
             small_random_matrix.set_value(sample)
             generated_images = predict_image()
+            print (generated_images.shape)
 
             for k in range(pred_batch):
                 plt.subplot(1, pred_batch, (k + 1))
