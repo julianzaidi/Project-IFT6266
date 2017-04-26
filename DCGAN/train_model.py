@@ -103,10 +103,11 @@ def train_model(learning_rate_dis=0.0002, learning_rate_gen=0.0002, n_epochs=2, 
     print('... Training')
 
     epoch = 0
-    nb_train_dis = 30
+    nb_train_dis = 10
     nb_train_gen = 20
     nb_batch = 10000 // batch_size
-    nb_block = nb_batch // nb_train_dis
+    #nb_block = nb_batch // nb_train_dis
+    nb_block = nb_batch // nb_train_gen
     loss_dis = []
     loss_gen = []
 
