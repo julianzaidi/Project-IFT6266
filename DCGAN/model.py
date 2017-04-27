@@ -1,5 +1,5 @@
 """
-        Implementation of a CNN autoencoder
+        Implementation of a DCGAN
         """
 
 import lasagne
