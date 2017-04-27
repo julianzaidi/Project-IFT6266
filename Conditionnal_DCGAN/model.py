@@ -7,7 +7,7 @@ import lasagne.layers as layers
 from lasagne import nonlinearities
 
 
-def build_context_encoder(input_var=None, nfilters=[64, 128, 256, 512, 2000, 512, 256, 128, 3], input_channels=3):
+def build_context_encoder(input_var=None, nfilters=[64, 128, 256, 512, 3000, 512, 256, 128, 3], input_channels=3):
     ###############################
     # Build Network Configuration #
     ###############################
