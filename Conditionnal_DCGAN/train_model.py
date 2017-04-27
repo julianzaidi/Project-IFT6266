@@ -1,5 +1,5 @@
 import sys
-import timeit
+#import timeit
 import theano
 import lasagne
 import numpy as np
@@ -36,7 +36,7 @@ def rolling_average(list, max_iter=100):
     return y
 
 
-def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1, batch_size=20):
+def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=40, batch_size=20):
     '''
             Function that compute the training of the model
             '''
@@ -121,37 +121,36 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
     nb_train_gen = 10
     nb_batch = 10000 // batch_size
     nb_block = nb_batch // nb_train_dis
-    # nb_block = nb_batch // nb_train_gen
     loss_dis = []
     loss_model = []
 
     idx = 50
     pred_batch = 5
 
-    start_time = timeit.default_timer()
+    #start_time = timeit.default_timer()
 
     while (epoch < n_epochs):
         epoch = epoch + 1
         for i in range(nb_train_batch):
-            print (i)
+            #print (i)
             # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
             contour, center = get_image(data_path, train_input_path, train_target_path, str(i))
             for j in range(nb_block):
-                print (j)
+                #print (j)
                 for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
-                    print (index)
+                    #print (index)
                     input.set_value(contour[index * batch_size: (index + 1) * batch_size])
                     target.set_value(center[index * batch_size: (index + 1) * batch_size])
                     loss = train_dis()
                     loss_dis.append(loss)
                 for index in range(nb_train_gen * j, nb_train_gen * (j + 1)):
-                    print (index)
+                    #print (index)
                     input.set_value(contour[index * batch_size: (index + 1) * batch_size])
                     target.set_value(center[index * batch_size: (index + 1) * batch_size])
                     loss = train_model()
                     loss_model.append(loss)
 
-        if epoch % 1 == 0:
+        if epoch % 4 == 0:
             # save the model and a bunch of generated pictures
             print ('... saving model and generated images')
 
@@ -172,7 +171,7 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
 
             plt.savefig('generated_images_epoch' + str(epoch) + '.png', bbox_inches='tight')
 
-    end_time = timeit.default_timer()
+    #end_time = timeit.default_timer()
 
     # Plot the learning curve
     ax1 = host_subplot(111, axes_class=AA.Axes)
@@ -197,7 +196,7 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
     plt.savefig('Learning_curve')
 
     print('Optimization complete.')
-    print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
+    #print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
 
 
 if __name__ == '__main__':
