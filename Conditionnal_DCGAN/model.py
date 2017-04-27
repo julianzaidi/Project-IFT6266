@@ -35,7 +35,7 @@ def build_context_encoder(input_var=None, nfilters=[64, 128, 256, 512, 3000, 512
     network = layers.batch_norm(lasagne.layers.Conv2DLayer(network, num_filters=nfilters[3], filter_size=(5, 5),
                                                            stride=2, pad=2, nonlinearity=leaky))
 
-    # Conv layer : shape = (batch_size, 4000, 1, 1)
+    # Conv layer : shape = (batch_size, 3000, 1, 1)
     network = layers.batch_norm(lasagne.layers.Conv2DLayer(network, num_filters=nfilters[4], filter_size=(4, 4),
                                                            stride=2, nonlinearity=leaky))
 
