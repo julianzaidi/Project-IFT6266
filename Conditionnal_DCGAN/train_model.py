@@ -19,12 +19,24 @@ from model import build_discriminator
 sys.path.insert(0, '/home2/ift6ed67/Project-IFT6266/CNN_Autoencoder')
 from utils import shared_GPU_data
 from utils import get_path
+from utils import assemble
 from utils import get_image
 
 theano.config.floatX = 'float32'
 
 
-def train_model(learning_rate_dis=0.0002, learning_rate_model=0.0009, n_epochs=2, batch_size=100):
+def rolling_average(list, max_iter=100):
+    y = []
+    for i in range(len(list)):
+        if i < max_iter:
+            y.append(np.mean(list[:i + 1]))
+        else:
+            y.append(np.mean(list[i - max_iter:i + 1]))
+
+    return y
+
+
+def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1, batch_size=100):
     '''
             Function that compute the training of the model
             '''
@@ -67,18 +79,27 @@ def train_model(learning_rate_dis=0.0002, learning_rate_model=0.0009, n_epochs=2
     z = T.tensor4('x', dtype=theano.config.floatX)
 
     # Creation of the model
-    model = build_context_encoder(input_var=x)
-    params_model = layers.get_all_params(model, trainable=True)
-    output_model = layers.get_output(model, deterministic=True)
-    discriminator = build_discriminator(input_var=y)
-    params_dis = layers.get_all_params(discriminator, trainable=True)
-    model_dis = layers.get_output(discriminator, inputs=output_model, deterministic=True)
-    real_dis = layers.get_output(discriminator, deterministic=True)
-    loss_model = 0.001 * -T.mean(T.log(model_dis)) + 0.999 * T.mean(objectives.squared_error(output_model, z))
-    loss_dis = 0.001 * -T.mean(T.log(real_dis) + T.log(1 - model_dis))
+    model = build_context_encoder(input_var=None)
+    discriminator = build_discriminator(input_var=None)
 
-    updates_model = lasagne.updates.adam(loss_model, params_model, learning_rate=learning_rate_model, beta1=0.5)
+    fake_image = layers.get_output(model, inputs=x)
+    fake_image_det = layers.get_output(model, inputs=x, deterministic=True)
+    prob_real = layers.get_output(discriminator, inputs=y)
+    prob_fake = layers.get_output(discriminator, inputs=fake_image)
+
+    params_model = layers.get_all_params(model, trainable=True)
+    params_dis = layers.get_all_params(discriminator, trainable=True)
+
+    loss_real = -T.mean(T.log(prob_real))
+    loss_fake = -T.mean(T.log(1 - prob_fake))
+    loss_dis = 0.001 * (loss_real + loss_fake)
+
+    loss_gen = -T.mean(T.log(prob_fake))
+    recons_error = T.mean(objectives.squared_error(fake_image, z))
+    loss_model = 0.001 * loss_gen + 0.999 * recons_error
+
     updates_dis = lasagne.updates.adam(loss_dis, params_dis, learning_rate=learning_rate_dis, beta1=0.5)
+    updates_model = lasagne.updates.adam(loss_model, params_model, learning_rate=learning_rate_model, beta1=0.5)
 
     # Creation of theano functions
     train_dis = theano.function([], loss_dis, updates=updates_dis, allow_input_downcast=True,
@@ -87,8 +108,7 @@ def train_model(learning_rate_dis=0.0002, learning_rate_model=0.0009, n_epochs=2
     train_model = theano.function([], loss_model, updates=updates_model, allow_input_downcast=True,
                                   givens={x: input, z: target})
 
-    predict_image = theano.function([], output_model, allow_input_downcast=True,
-                                    givens={x: input})
+    predict_image = theano.function([], fake_image_det, allow_input_downcast=True, givens={x: input})
 
     ###################
     # Train the model #
@@ -97,8 +117,8 @@ def train_model(learning_rate_dis=0.0002, learning_rate_model=0.0009, n_epochs=2
     print('... Training')
 
     epoch = 0
-    nb_train_dis = 10
-    nb_train_gen = 5
+    nb_train_dis = 25
+    nb_train_gen = 10
     nb_batch = 10000 // batch_size
     nb_block = nb_batch // nb_train_dis
     # nb_block = nb_batch // nb_train_gen
@@ -131,23 +151,24 @@ def train_model(learning_rate_dis=0.0002, learning_rate_model=0.0009, n_epochs=2
                     loss = train_model()
                     loss_model.append(loss)
 
-        if epoch % 5 == 0:
+        if epoch % 1 == 0:
             # save the model and a bunch of generated pictures
             print ('... saving model and generated images')
 
             np.savez('discriminator_epoch' + str(epoch) + '.npz', *layers.get_all_param_values(discriminator))
             np.savez('context_encoder_epoch' + str(epoch) + '.npz', *layers.get_all_param_values(model))
-            np.save('loss_dis_epoch' + str(epoch), loss_dis)
-            np.save('loss_gen_epoch' + str(epoch), loss_model)
+            np.save('loss_dis', loss_dis)
+            np.save('loss_gen', loss_model)
 
             contour, center = get_image(data_path, valid_input_path, valid_target_path, str(0))
             input.set_value(contour[idx * pred_batch: (idx + 1) * pred_batch])
-            generated_images = predict_image()
+            generated_centers = predict_image()
+            generated_images = assemble(contour[idx * pred_batch: (idx + 1) * pred_batch], generated_centers)
 
-            for i in range(pred_batch):
-                plt.subplot(1, pred_batch, (i + 1))
+            for k in range(pred_batch):
+                plt.subplot(1, pred_batch, (k + 1))
                 plt.axis('off')
-                plt.imshow(generated_images[i, :, :, :].transpose(1, 2, 0))
+                plt.imshow(generated_images[k, :, :, :].transpose(1, 2, 0))
 
             plt.savefig('generated_images_epoch' + str(epoch) + '.png', bbox_inches='tight')
 
@@ -167,13 +188,13 @@ def train_model(learning_rate_dis=0.0002, learning_rate_model=0.0009, n_epochs=2
     ax2.set_xlabel('training iteration (Context encoder)', color='b')
     ax1.set_ylabel('Loss')
 
-    ax1.plot(x1, loss_dis, 'g', label='Discriminator loss')
-    ax2.plot(x2, loss_model, 'b', label='Context encoder Loss')
+    ax1.plot(x1, rolling_average(loss_dis), 'g', label='Discriminator loss')
+    ax2.plot(x2, rolling_average(loss_model), 'b', label='Context encoder Loss')
 
     ax1.grid(True)
     ax1.legend()
 
-    plt.savefig('Learning_curve_epoch5')
+    plt.savefig('Learning_curve')
 
     print('Optimization complete.')
     print('The code ran for %.2fm' % ((end_time - start_time) / 60.))

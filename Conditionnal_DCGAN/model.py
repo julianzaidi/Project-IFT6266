@@ -36,8 +36,8 @@ def build_context_encoder(input_var=None, nfilters=[64, 128, 256, 512, 4000, 512
                                                            stride=2, pad=2, nonlinearity=leaky))
 
     # Conv layer : shape = (batch_size, 4000, 1, 1)
-    network = layers.batch_norm(lasagne.layers.Conv2DLayer(network, num_filters=nfilters[4], filter_size=(5, 5),
-                                                           stride=2, pad=2, nonlinearity=leaky))
+    network = layers.batch_norm(lasagne.layers.Conv2DLayer(network, num_filters=nfilters[4], filter_size=(4, 4),
+                                                           stride=2, nonlinearity=leaky))
 
     # Tranposed conv layer : shape = (batch_size, 512, 4, 4)
     network = layers.batch_norm(layers.TransposedConv2DLayer(network, num_filters=nfilters[5], filter_size=(4, 4),
@@ -53,7 +53,7 @@ def build_context_encoder(input_var=None, nfilters=[64, 128, 256, 512, 4000, 512
 
     # Tranposed conv layer : shape = (batch_size, 3, 32, 32)
     network = layers.TransposedConv2DLayer(network, num_filters=nfilters[8], filter_size=5, stride=2, crop=2,
-                                           output_size=64, nonlinearity=nonlinearities.sigmoid)
+                                           output_size=32, nonlinearity=nonlinearities.sigmoid)
 
     return network
 
