@@ -133,19 +133,19 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
     while (epoch < n_epochs):
         epoch = epoch + 1
         for i in range(nb_train_batch):
-            # print (i)
+            print (i)
             # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
             contour, center = get_image(data_path, train_input_path, train_target_path, str(i))
             for j in range(nb_block):
-                # print (j)
+                print (j)
                 for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
-                    # print (index)
+                    print (index)
                     input.set_value(contour[index * batch_size: (index + 1) * batch_size])
                     target.set_value(center[index * batch_size: (index + 1) * batch_size])
                     loss = train_dis()
                     loss_dis.append(loss)
                 for index in range(nb_train_gen * j, nb_train_gen * (j + 1)):
-                    # print (index)
+                    print (index)
                     input.set_value(contour[index * batch_size: (index + 1) * batch_size])
                     target.set_value(center[index * batch_size: (index + 1) * batch_size])
                     loss = train_model()
