@@ -151,7 +151,7 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
                     loss_dis.append(loss)
                 for index in range(nb_train_gen * j, nb_train_gen * (j + 1)):
                     print (index)
-                    rand_nb = random.sample(range(0, len(list)), 1)
+                    rand_nb = random.randint(0, len(list) - 1)
                     train_caption = caption[rand_nb]
                     if train_caption.shape[0] >= batch_size:
                         random_idx = random.sample(range(0, train_caption.shape[0]), batch_size)
