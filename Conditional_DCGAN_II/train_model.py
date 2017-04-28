@@ -1,6 +1,6 @@
 import sys
 import random
-import timeit
+#import timeit
 import theano
 import lasagne
 import numpy as np
@@ -37,7 +37,7 @@ def rolling_average(list, max_iter=100):
     return y
 
 
-def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1, batch_size=20, nb_caption='max'):
+def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=36, batch_size=20, nb_caption='max'):
     '''
             Function that compute the training of the model
             '''
@@ -87,11 +87,11 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
 
     loss_real = -T.mean(T.log(prob_real))
     loss_fake = -T.mean(T.log(1 - prob_fake))
-    loss_dis = 0.001 * (loss_real + loss_fake)
+    loss_dis = 0.005 * (loss_real + loss_fake)
 
     loss_gen = -T.mean(T.log(prob_fake))
     recons_error = T.mean(objectives.squared_error(fake_image, z))
-    loss_model = 0.001 * loss_gen + 0.999 * recons_error
+    loss_model = 0.005 * loss_gen + 0.995 * recons_error
 
     updates_dis = lasagne.updates.adam(loss_dis, params_dis, learning_rate=learning_rate_dis, beta1=0.5)
     updates_model = lasagne.updates.adam(loss_model, params_model, learning_rate=learning_rate_model, beta1=0.5)
@@ -118,13 +118,12 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
     loss_model = []
 
     idx = [0, 1, 2, 4, 5]
-
-    start_time = timeit.default_timer()
+    #start_time = timeit.default_timer()
 
     while (epoch < n_epochs):
         epoch = epoch + 1
         for i in range(nb_train_batch):
-            print (i)
+            #print (i)
             # Shape = (10000, 3, 64, 64) & Shape = (10000, 3, 32, 32)
             contour, center = get_image(data_path, train_input_path, train_target_path, str(i))
             # List of captions of different sequence length
@@ -132,9 +131,9 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
             # List of size nb_train_dis
             list = [k % len(caption) for k in range(nb_train_dis)]
             for j in range(nb_block):
-                print (j)
+                #print (j)
                 for index in range(nb_train_dis * j, nb_train_dis * (j + 1)):
-                    print (index)
+                    #print (index)
                     train_caption = caption[list[index % nb_train_dis]]
                     if train_caption.shape[0] >= batch_size:
                         random_idx = random.sample(range(0, train_caption.shape[0]), batch_size)
@@ -143,14 +142,10 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
                     input = contour[train_caption[random_idx, -1] - i * 10000]
                     target = center[train_caption[random_idx, -1] - i * 10000]
                     train_caption = train_caption[random_idx, :-1]
-                    if index == 13:
-                        print (input.shape)
-                        print (target.shape)
-                        print (train_caption.shape)
                     loss = train_dis(input, target, train_caption)
                     loss_dis.append(loss)
                 for index in range(nb_train_gen * j, nb_train_gen * (j + 1)):
-                    print (index)
+                    #print (index)
                     rand_nb = random.randint(0, len(list) - 1)
                     train_caption = caption[rand_nb]
                     if train_caption.shape[0] >= batch_size:
@@ -160,14 +155,10 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
                     input = contour[train_caption[random_idx, -1] - i * 10000]
                     target = center[train_caption[random_idx, -1] - i * 10000]
                     train_caption = train_caption[random_idx, :-1]
-                    if index == 6:
-                        print (input.shape)
-                        print (target.shape)
-                        print (train_caption.shape)
                     loss = train_model(input, target, train_caption)
                     loss_model.append(loss)
 
-        if epoch % 1 == 0:
+        if epoch % 4 == 0:
             # save the model and a bunch of generated pictures
             print ('... saving model and generated images')
 
@@ -180,8 +171,6 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
             caption = get_caption(data_path, valid_caption_path, str(0), str(nb_caption))
             valid_caption = caption[4][idx]
             input = contour[valid_caption[:, -1]]
-            print (valid_caption.shape)
-            print (input.shape)
 
             generated_centers = predict_image(input, valid_caption[:, :-1])
             generated_images = assemble(input, generated_centers)
@@ -193,7 +182,7 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
 
             plt.savefig('generated_images_epoch' + str(epoch) + '.png', bbox_inches='tight')
 
-    end_time = timeit.default_timer()
+    #end_time = timeit.default_timer()
 
     # Plot the learning curve
     ax1 = host_subplot(111, axes_class=AA.Axes)
@@ -218,7 +207,7 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
     plt.savefig('Learning_curve')
 
     print('Optimization complete.')
-    print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
+    #print('The code ran for %.2fm' % ((end_time - start_time) / 60.))
 
 
 if __name__ == '__main__':
