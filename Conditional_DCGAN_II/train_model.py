@@ -87,11 +87,11 @@ def train_model(learning_rate_dis=0.0004, learning_rate_model=0.0004, n_epochs=1
 
     loss_real = -T.mean(T.log(prob_real))
     loss_fake = -T.mean(T.log(1 - prob_fake))
-    loss_dis = 0.005 * (loss_real + loss_fake)
+    loss_dis = 0.003 * (loss_real + loss_fake)
 
     loss_gen = -T.mean(T.log(prob_fake))
     recons_error = T.mean(objectives.squared_error(fake_image, z))
-    loss_model = 0.005 * loss_gen + 0.995 * recons_error
+    loss_model = 0.003 * loss_gen + 0.997 * recons_error
 
     updates_dis = lasagne.updates.adam(loss_dis, params_dis, learning_rate=learning_rate_dis, beta1=0.5)
     updates_model = lasagne.updates.adam(loss_model, params_model, learning_rate=learning_rate_model, beta1=0.5)
