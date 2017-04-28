@@ -51,7 +51,7 @@ def integrate_captions(input_var=T.imatrix()):
     return network
 
 
-def build_context_encoder(input_var1=None, input_var2=T.imatrix(), nfilters=[64, 128, 256, 512, 3000, 512, 256, 128, 3],
+def build_context_encoder(input_var1=None, input_var2=T.imatrix(), nfilters=[64, 128, 256, 512, 2500, 512, 256, 128, 3],
                           input_channels=3):
     ###############################
     # Build Network Configuration #
@@ -80,14 +80,14 @@ def build_context_encoder(input_var1=None, input_var2=T.imatrix(), nfilters=[64,
     network = layers.batch_norm(lasagne.layers.Conv2DLayer(network, num_filters=nfilters[3], filter_size=(5, 5),
                                                            stride=2, pad=2, nonlinearity=leaky))
 
-    # Conv layer : shape = (batch_size, 3000, 1, 1)
+    # Conv layer : shape = (batch_size, 2500, 1, 1)
     network = layers.batch_norm(lasagne.layers.Conv2DLayer(network, num_filters=nfilters[4], filter_size=(4, 4),
                                                            stride=2, nonlinearity=leaky))
 
     # Integrating captions to the model : shape = (nb_caption, 500, 1, 1)
     captions = integrate_captions(input_var=input_var2)  # nb_caption = batch_size
 
-    # Concatenation : shape = (batch_size, 3500, 1, 1)
+    # Concatenation : shape = (batch_size, 3000, 1, 1)
     network = layers.ConcatLayer([network, captions])
 
     # Tranposed conv layer : shape = (batch_size, 512, 4, 4)
