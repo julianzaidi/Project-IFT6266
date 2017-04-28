@@ -2,6 +2,7 @@
         Implementation of a conditional DCGAN
         """
 
+import sys
 import lasagne
 import theano.tensor as T
 import lasagne.layers as layers
